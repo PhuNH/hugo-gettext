@@ -1,0 +1,31 @@
+# SPDX-FileCopyrightText: 2023 Phu Hung Nguyen <phuhnguyen@outlook.com>
+# SPDX-License-Identifier: CC0-1.0
+
+[tool.poetry]
+name = "hugo-gettext"
+version = "0.1.0"
+description = "I18n for Hugo with gettext"
+authors = ["Phu Hung Nguyen <phuhnguyen@outlook.com>"]
+license = "GPL-3.0-or-later"
+readme = "README.md"
+repository = "https://github.com/phunh/hugo-gettext"
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Software Development :: Internationalization",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python",
+    "Programming Language :: Python :: 3"
+]
+packages = [{include = "hugo_gettext"}]
+
+[tool.poetry.dependencies]
+python = "^3.8"
+markdown-it-py = "^2.2.0"
+mdit-py-plugins = "^0.3.5"
+mdit-py-hugo = "^0.2.0"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
