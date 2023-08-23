@@ -16,7 +16,8 @@ from markdown_it.token import Token
 from markdown_it.utils import OptionsDict
 from pygments import lexers, util
 
-from .utils import L10NResult, L10NFunc
+from .generation_content import render_front_matter
+from .generation_utils import L10NResult, L10NFunc
 
 SPACES_PATTERN = re.compile(r'\s+')
 SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
@@ -138,10 +139,6 @@ def _link_ref(env: MutableMapping, content_result: L10NResult):
             content_result.total_count += 1
             content_result.localized += f' "{localized_title}"'
         content_result.localized += '\n'
-
-
-def render_front_matter(_token: Token, _env: MutableMapping) -> L10NResult:
-    pass
 
 
 class RendererMarkdownL10N(RendererProtocol):
