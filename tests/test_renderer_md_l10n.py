@@ -8,11 +8,11 @@ from markdown_it import MarkdownIt
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
 
-from hugo_gettext.renderer_localized_md import RendererLocalizedMd
+from hugo_gettext.generation.renderer_md_l10n import RendererMarkdownL10N
 
 
 class RendererLocalizedMdTestCase(unittest.TestCase):
-    mdi = MarkdownIt(renderer_cls=RendererLocalizedMd).use(front_matter_plugin) \
+    mdi = MarkdownIt(renderer_cls=RendererMarkdownL10N).use(front_matter_plugin) \
         .enable('table').use(deflist_plugin)
 
     def _prep_test(self, f_obj):

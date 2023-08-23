@@ -124,12 +124,16 @@ def _fence(token: Token, md_ctx: _MdCtx, content_result: L10NResult):
 
 
 def _link_ref(env: MutableMapping, content_result: L10NResult):
-    for ref, details in env.get('references', {}).items():
+    refs = env.get('references', {}).items()
+    if len(refs) == 0:
+        return
+    content_result.localized += '\n'
+    for ref, details in refs:
         href = details['href']
         content_result.localized += f'[{ref}]: {href}'
-        if 'title' in details:
-            localized_title = env['l10n_func'](details['title'])
-            if localized_title is not details['title']:
+        if title := details.get('title', ''):
+            localized_title = env['l10n_func'](title)
+            if localized_title is not title:
                 content_result.l10n_count += 1
             content_result.total_count += 1
             content_result.localized += f' "{localized_title}"'
@@ -140,7 +144,7 @@ def render_front_matter(_token: Token, _env: MutableMapping) -> L10NResult:
     pass
 
 
-class RendererLocalizedMd(RendererProtocol):
+class RendererMarkdownL10N(RendererProtocol):
     __output__ = "md"
 
     def __init__(self, _):
@@ -160,7 +164,7 @@ class RendererLocalizedMd(RendererProtocol):
         :return: an `L10NResult`
 
         If the first token is of `front_matter` type, `env` must have
-        `hg_conf`, `hugo_lang_code`, `l10n_results`, `src_strings`, `mdi`, and `l10n_func` attributes.
+        `l10n_results`, `hugo_lang_code`, `l10n_func`, `mdi`, `hg_config`, and `src_strings` attributes.
         Otherwise, only `l10n_func` is required.
         """
         if tokens[0].type == 'front_matter':
@@ -184,7 +188,10 @@ class RendererLocalizedMd(RendererProtocol):
     def inline(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
         token = tokens[idx]
         content = SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
-        localized_content = md_ctx.l10n_func(content)
+        if not content or SPACES_PATTERN.fullmatch(content):
+            localized_content = content
+        else:
+            localized_content = md_ctx.l10n_func(content)
         if localized_content is not content:
             content_result.l10n_count += 1
         content_result.total_count += 1
@@ -285,16 +292,17 @@ class RendererLocalizedMd(RendererProtocol):
         content_result.localized += '\n'
         if idx < len(tokens) - 1:
             next_token = tokens[idx + 1]
-            # add a blank line when next token is a setext heading_open, an indented code block, or a paragraph open
+            # add a blank line when next token is a setext heading_open, an indented code block, a paragraph open,
+            # or a definition list open
             if (next_token.type == 'heading_open' and next_token.markup in SETEXT_HEADING_MARKUPS) \
-                    or next_token.type in {'code_block', 'paragraph_open'}:
+                    or next_token.type in {'code_block', 'paragraph_open', 'dl_open'}:
                 content_result.localized += f'{md_ctx.line_indent}\n'
 
     # indented code block
     @classmethod
     def code_block(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
         token = tokens[idx]
-        localized_code_block = token.content.strip().replace('\n', f'\n{md_ctx.line_indent}    ')
+        localized_code_block = token.content.replace('\n', f'\n{md_ctx.line_indent}    ')
         content_result.localized += f'{md_ctx.get_line_indent()}    {localized_code_block}\n'
 
     # fenced code block
