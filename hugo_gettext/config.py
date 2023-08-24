@@ -100,16 +100,20 @@ class Config:
                 return
 
         i18n_config = hugo_config['i18n']
-        # env. var. before config value
+        # env. var. > config value
         self.package = os.environ.get('PACKAGE', '') or i18n_config.get('package', '')
         if not self.package:
             raise ValueError('Neither a PACKAGE env. var nor an i18n.package config exists. At least one is required.')
 
-        # command line arg. before config value
+        # command line arg. > config value
         customs_path = customs_path or i18n_config.get('customs', '')
         customs_functions = _get_customs_functions(customs_path)
-        get_default_domain_name = customs_functions.get('get_default_domain_name', _get_default_domain_name)
-        self.default_domain_name = get_default_domain_name(self.package)
+        # value directly set in config file > value gotten by calling custom function
+        if default_domain_name := i18n_config.get('defaultDomain', ''):
+            self.default_domain_name = default_domain_name
+        else:
+            get_default_domain_name = customs_functions.get('get_default_domain_name', _get_default_domain_name)
+            self.default_domain_name = get_default_domain_name(self.package)
         get_custom_excluded_keys = customs_functions.get('get_custom_excluded_keys', _get_custom_excluded_keys)
         custom_excluded_keys = get_custom_excluded_keys()
         self.load_lang_names = customs_functions.get('load_lang_names', _load_lang_names)
