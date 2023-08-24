@@ -44,7 +44,6 @@ def process_fm_conditions(fm: Dict, l10n_env: L10NEnv):
     hg_config = l10n_env.hg_config
     l10n_results = l10n_env.l10n_results
     src_strings = l10n_env.src_strings
-    default_domain_name = hg_config.get_default_domain_name(hg_config.package)
     i18n_conditions = fm.get('i18n_configs', {}).get('conditions', [])
     conditions_met = True
     for cond in i18n_conditions:
@@ -57,11 +56,11 @@ def process_fm_conditions(fm: Dict, l10n_env: L10NEnv):
             domain = (
                 next(
                     (domain for domain in hg_config.content if item in hg_config.content[domain]),
-                    '') if item != 'strings' else default_domain_name)
+                    '') if item != 'strings' else hg_config.default_domain_name)
             if not domain:
                 continue
             if domain == 'default':
-                domain = default_domain_name
+                domain = hg_config.default_domain_name
 
             l10n_func = gettext_func(domain)
             if item == 'strings':

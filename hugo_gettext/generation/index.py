@@ -33,9 +33,8 @@ def generate(args):
         default_func = None
         l10n_results: L10NResults = {}
 
-        default_domain_name = hg_config.get_default_domain_name(hg_config.package)
         for domain in hg_config.content:
-            domain_name = domain if domain != 'default' else default_domain_name
+            domain_name = domain if domain != 'default' else hg_config.default_domain_name
             mo_path = f'locale/{lang_code}/LC_MESSAGES/{domain_name}.mo'
             if os.path.isfile(mo_path):
                 l10n_func = gettext_func(domain_name)
@@ -44,14 +43,14 @@ def generate(args):
             #   can still be qualified if there are files with no content to be translated
             else:
                 def l10n_func(x): return x
-            if domain_name == default_domain_name:
+            if domain_name == hg_config.default_domain_name:
                 default_func = l10n_func
             l10n_env = L10NEnv(l10n_results, hugo_lang_code, l10n_func, mdi, hg_config, src_strings)
             file_l10n_count += generate_content_domain(domain, l10n_env)
         if default_func is None:
-            mo_path = f'locale/{lang_code}/LC_MESSAGES/{default_domain_name}.mo'
+            mo_path = f'locale/{lang_code}/LC_MESSAGES/{hg_config.default_domain_name}.mo'
             if os.path.isfile(mo_path):
-                default_func = gettext_func(default_domain_name)
+                default_func = gettext_func(hg_config.default_domain_name)
             # ensure default_func is not None and thus generate_others is still called even when a language
             #   has no file for the default domain, so that the language can still be qualified
             else:

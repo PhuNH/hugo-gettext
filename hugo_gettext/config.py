@@ -3,8 +3,9 @@
 
 import glob
 import importlib.util
+import inspect
 import os
-from typing import List, Dict
+from typing import List, Dict, Callable, Set
 
 import yaml
 
@@ -62,11 +63,16 @@ excluded_keys = {'aliases', 'date',
                  'i18n_configs', 'layout',
                  'publishDate',
                  'type', 'url'}
-# TODO how to customize this?
-custom_excluded_keys = {'appstream', 'authors', 'background', 'cdnJsFiles', 'cssFiles', 'flatpak_exp',
-                        'forum', 'jsFiles', 'hl_class', 'hl_video', 'konqi', 'minJsFiles', 'parent',
-                        'sassFiles', 'screenshot', 'scssFiles', 'SPDX-License-Identifier', 'src_icon',
-                        'userbase'}
+
+
+def _get_customs_functions(customs_path: str) -> Dict[str, Callable]:
+    if not customs_path:
+        return {}
+    spec = importlib.util.spec_from_file_location('hugo_gettext_customs', customs_path)
+    customs = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(customs)
+    functions = inspect.getmembers(customs, inspect.isfunction)
+    return {f[0]: f[1] for f in functions}
 
 
 def _load_lang_names() -> Dict:
@@ -77,34 +83,37 @@ def _get_default_domain_name(package: str) -> str:
     return package
 
 
-def _convert_lang_code(lang_code) -> str:
+def _convert_lang_code(lang_code: str) -> str:
     hugo_lang_code = lang_code
     return hugo_lang_code
 
 
+def _get_custom_excluded_keys() -> Set[str]:
+    return set()
+
+
 class Config:
-    def __init__(self, customs_path: str):
+    def __init__(self, customs_path: str = ''):
         with open('config.yaml') as f:
             hugo_config = yaml.safe_load(f)
             if 'i18n' not in hugo_config:
                 return
 
         i18n_config = hugo_config['i18n']
+        # env. var. before config value
         self.package = os.environ.get('PACKAGE', '') or i18n_config.get('package', '')
         if not self.package:
             raise ValueError('Neither a PACKAGE env. var nor an i18n.package config exists. At least one is required.')
 
-        if customs_path:
-            spec = importlib.util.spec_from_file_location('hugo_gettext_customs', customs_path)
-            customs = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(customs)
-            self.load_lang_names = customs.load_lang_names
-            self.get_default_domain_name = customs.get_default_domain_name
-            self.convert_lang_code = customs.convert_lang_code
-        else:
-            self.load_lang_names = _load_lang_names
-            self.get_default_domain_name = _get_default_domain_name
-            self.convert_lang_code = _convert_lang_code
+        # command line arg. before config value
+        customs_path = customs_path or i18n_config.get('customs', '')
+        customs_functions = _get_customs_functions(customs_path)
+        get_default_domain_name = customs_functions.get('get_default_domain_name', _get_default_domain_name)
+        self.default_domain_name = get_default_domain_name(self.package)
+        get_custom_excluded_keys = customs_functions.get('get_custom_excluded_keys', _get_custom_excluded_keys)
+        custom_excluded_keys = get_custom_excluded_keys()
+        self.load_lang_names = customs_functions.get('load_lang_names', _load_lang_names)
+        self.convert_lang_code = customs_functions.get('convert_lang_code', _convert_lang_code)
 
         self.gen_to_other_dir = i18n_config.get('genToOtherDir', False)
         self.src_dir = i18n_config.get('srcDir', 'content')
