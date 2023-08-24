@@ -92,6 +92,13 @@ def _get_custom_excluded_keys() -> Set[str]:
     return set()
 
 
+def _get_pot_fields() -> Dict[str, str]:
+    return {
+        'report_address': '',
+        'team_address': ''
+    }
+
+
 class Config:
     def __init__(self, customs_path: str = ''):
         with open('config.yaml') as f:
@@ -114,6 +121,16 @@ class Config:
         else:
             get_default_domain_name = customs_functions.get('get_default_domain_name', _get_default_domain_name)
             self.default_domain_name = get_default_domain_name(self.package)
+        get_pot_fields = customs_functions.get('get_pot_fields', _get_pot_fields)
+        pot_fields = get_pot_fields()
+        if report_address := i18n_config.get('reportAddress', ''):
+            self.report_address = report_address
+        else:
+            self.report_address = pot_fields.get('report_address', '')
+        if team_address := i18n_config.get('teamAddress', ''):
+            self.team_address = team_address
+        else:
+            self.team_address = pot_fields.get('team_address', '')
         get_custom_excluded_keys = customs_functions.get('get_custom_excluded_keys', _get_custom_excluded_keys)
         custom_excluded_keys = get_custom_excluded_keys()
         self.load_lang_names = customs_functions.get('load_lang_names', _load_lang_names)
