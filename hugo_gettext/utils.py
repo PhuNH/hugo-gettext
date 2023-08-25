@@ -9,6 +9,7 @@ import yaml
 
 from markdown_it import MarkdownIt
 from markdown_it.renderer import RendererProtocol
+from mdit_py_hugo.shortcode import shortcode_plugin
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
 
@@ -16,11 +17,12 @@ from .config import Config
 
 SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
 SPACES_PATTERN = re.compile(r'\s+')
+SHORTCODE_QUOTES = {'"', '`'}
 
 
 def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple[Config, MarkdownIt]:
     hg_config = Config(customs_path)
-    mdi = MarkdownIt(renderer_cls=renderer_cls).use(front_matter_plugin)
+    mdi = MarkdownIt(renderer_cls=renderer_cls).use(front_matter_plugin).use(shortcode_plugin)
     if hg_config.parse_table:
         mdi = mdi.enable('table')
     if hg_config.parse_definition_list:

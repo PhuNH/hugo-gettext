@@ -148,6 +148,7 @@ class Config:
         self.excluded_data_keys = set(i18n_config.get('excludedDataKeys', '').split())
         self.excluded_keys = excluded_keys | custom_excluded_keys | set(i18n_config.get('excludedKeys', '').split())
         self.langs = i18n_config.get('langs', '').split()
+        self.shortcodes = i18n_config.get('shortcodes', {})
 
         goldmark_config = hugo_config.get('markup', {}).get('goldmark', {})
         extensions_config = goldmark_config.get('extensions', {})

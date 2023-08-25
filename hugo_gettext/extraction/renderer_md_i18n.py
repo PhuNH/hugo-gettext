@@ -39,7 +39,9 @@ class RendererMarkdownI18N(RendererProtocol):
 
         for i, token in enumerate(tokens):
             if token.type in self.rules:
-                self.rules[token.type](tokens, i, i18n_env)
+                r = self.rules[token.type](tokens, i, i18n_env)
+                if r == -1:
+                    break
 
         _link_ref(env, i18n_env)
 
@@ -56,9 +58,45 @@ class RendererMarkdownI18N(RendererProtocol):
     @classmethod
     def inline(cls, tokens: Sequence[Token], idx: int, i18n_env: I18NEnv):
         token = tokens[idx]
-        content = utils.SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
-        if content and not utils.SPACES_PATTERN.fullmatch(content):
-            i18n_env.add_entry(content, token.map[0] + 1)
+        # when there's no relevant config, ignore the whole shortcode
+        if len(token.children) == 1 and (sc := token.children[0]).type == 'shortcode':
+            if sc.meta['name'] == 'hg-stop':
+                return -1
+            sc_params_to_i12ize = i18n_env.hg_config.shortcodes.get('params', {}).get(sc.meta['name'], [])
+            sc_params_used = sc.meta['params']
+            for param in sc_params_to_i12ize:
+                if param in sc_params_used:
+                    content: str = sc_params_used[param]
+                    if content[0] in utils.SHORTCODE_QUOTES:
+                        # keep newlines in raw string parameters (passed with ``)
+                        if content[0] == '"':
+                            content = utils.SPACES_PATTERN.sub(' ', content)
+                        content = content[1:-1]
+                    i18n_env.add_entry(content, token.map[0] + 1)
+        else:
+            # in case we want to parse shortcodes nested in inlines
+            # content = ''
+            # link = ''
+            # for t in token.children:
+            #     if t.type == 'softbreak':
+            #         content += ' '
+            #     elif t.type == 'link_open':
+            #         content += '['
+            #         link = t.attrs['href']
+            #     elif t.type == 'link_close':
+            #         content += f']({link})'
+            #     elif t.type in {'em_open', 'em_close', 'strong_open', 'strong_close'}:
+            #         content += t.markup
+            #     elif t.type == 'image':
+            #         content += f'![{t.content}]({t.attrs["src"]})'
+            #     elif t.type == 'code_inline':
+            #         content += f'{t.markup}{t.content}{t.markup}'
+            #     else:
+            #         content += t.content
+            # content = utils.SPACES_PATTERN.sub(' ', content)
+            content = utils.SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
+            if content and not utils.SPACES_PATTERN.fullmatch(content):
+                i18n_env.add_entry(content, token.map[0] + 1)
 
     @classmethod
     def fence(cls, tokens: Sequence[Token], idx: int, i18n_env: I18NEnv):
