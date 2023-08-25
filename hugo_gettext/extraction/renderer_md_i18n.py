@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 import inspect
-from typing import Sequence, MutableMapping
+from typing import Sequence, MutableMapping, List
 
 import pygments.token
 import yaml
@@ -62,7 +62,9 @@ class RendererMarkdownI18N(RendererProtocol):
         if len(token.children) == 1 and (sc := token.children[0]).type == 'shortcode':
             if sc.meta['name'] == 'hg-stop':
                 return -1
-            sc_params_to_i12ize = i18n_env.hg_config.shortcodes.get('params', {}).get(sc.meta['name'], [])
+            sc_params_config = i18n_env.hg_config.shortcodes.get('params', {})
+            sc_params_to_i12ize: List = sc_params_config.get(sc.meta['name'], [])
+            sc_params_to_i12ize.extend(sc_params_config.get('*', []))
             sc_params_used = sc.meta['params']
             for param in sc_params_to_i12ize:
                 if param in sc_params_used:
