@@ -9,6 +9,7 @@ import shutil
 from .generation_content import generate_content_domain
 from .generation_data_others import generate_data_others, write_config
 from .generation_utils import L10NResults, L10NEnv, gettext_func
+from .renderer_md_l10n import RendererMarkdownL10N
 from .. import utils
 
 
@@ -17,8 +18,7 @@ def generate(args):
     Generate target messages and files
     :return: None
     """
-
-    hg_config, mdi = utils.initialize(args.customs)
+    hg_config, mdi = utils.initialize(args.customs, RendererMarkdownL10N)
     src_strings = utils.read_strings()
     original_hugo_config = copy.deepcopy(hg_config.hugo_config)
     src_data = utils.read_data_files(hg_config)

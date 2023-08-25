@@ -2,22 +2,22 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 import os
-from typing import Tuple, Dict
+from typing import Tuple, Dict, Type
 
 import yaml
 
 from markdown_it import MarkdownIt
+from markdown_it.renderer import RendererProtocol
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
 
 from .config import Config
-from .generation.renderer_md_l10n import RendererMarkdownL10N
 
 
-# TODO: use this in extraction?
-def initialize(customs_path: str) -> Tuple[Config, MarkdownIt]:
+
+def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple[Config, MarkdownIt]:
     hg_config = Config(customs_path)
-    mdi = MarkdownIt(renderer_cls=RendererMarkdownL10N).use(front_matter_plugin)
+    mdi = MarkdownIt(renderer_cls=renderer_cls).use(front_matter_plugin)
     if hg_config.parse_table:
         mdi = mdi.enable('table')
     if hg_config.parse_definition_list:
