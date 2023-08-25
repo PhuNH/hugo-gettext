@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
 import os
+import re
 from typing import Tuple, Dict, Type
 
 import yaml
@@ -13,6 +14,8 @@ from mdit_py_plugins.front_matter import front_matter_plugin
 
 from .config import Config
 
+SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
+SPACES_PATTERN = re.compile(r'\s+')
 
 
 def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple[Config, MarkdownIt]:

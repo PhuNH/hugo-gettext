@@ -4,7 +4,6 @@
 """Render localized markdown"""
 
 import inspect
-import re
 import textwrap
 from collections.abc import MutableMapping
 from dataclasses import dataclass
@@ -18,9 +17,8 @@ from pygments import lexers, util
 
 from .generation_content import render_front_matter
 from .generation_utils import L10NResult, L10NFunc
+from .. import utils
 
-SPACES_PATTERN = re.compile(r'\s+')
-SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
 SETEXT_HEADING_MARKUPS = {'-', '='}
 ORDERED_LIST_MARKUPS = {'.', ')'}
 
@@ -98,7 +96,7 @@ def _fence(token: Token, md_ctx: _MdCtx, content_result: L10NResult):
                 last_nl = fence_ctx.next_indent.rfind('\n')
                 fence_ctx.localized += fence_ctx.next_indent[:last_nl + 1]
                 fence_ctx.indent = fence_ctx.next_indent[last_nl + 1:]
-            comment_match = SINGLE_COMMENT_PATTERN.match(tok_val)
+            comment_match = utils.SINGLE_COMMENT_PATTERN.match(tok_val)
             if fence_ctx.comment != '':
                 fence_ctx.comment += ' '
             fence_ctx.comment += comment_match.group(2).strip()
@@ -184,8 +182,8 @@ class RendererMarkdownL10N(RendererProtocol):
     @classmethod
     def inline(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
         token = tokens[idx]
-        content = SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
-        if not content or SPACES_PATTERN.fullmatch(content):
+        content = utils.SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
+        if not content or utils.SPACES_PATTERN.fullmatch(content):
             localized_content = content
         else:
             localized_content = md_ctx.l10n_func(content)
