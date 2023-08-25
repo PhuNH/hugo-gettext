@@ -4,6 +4,7 @@
 import logging
 from argparse import ArgumentParser, RawTextHelpFormatter
 
+from .extraction import extract
 from .generation import generate
 
 
@@ -14,6 +15,12 @@ def main():
     parser.add_argument('-c', '--customs', help='path to Python file containing custom functions')
     subparsers = parser.add_subparsers(description="used in the process from extracting source files' messages "
                                                    'to generating target files')
+
+    extract_cmd = subparsers.add_parser('extract', help='extract messages from source files',
+                                        formatter_class=RawTextHelpFormatter)
+    extract_cmd.add_argument('pot', help='either path of the only target pot file or path of the directory\n'
+                                         'containing the target pot file(s)')
+    extract_cmd.set_defaults(func=extract)
 
     generate_cmd = subparsers.add_parser('generate', help='generate target messages and files',
                                          formatter_class=RawTextHelpFormatter)

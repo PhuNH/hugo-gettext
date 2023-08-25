@@ -35,6 +35,7 @@ def render_content_file(path: str,
         return results[0], results[1]
 
     with open(path) as f_content:
+        # copy to a new object so that one file's env isn't carried over to that of another
         fm_result, content_result = l10n_env.mdi.render(f_content.read(), copy.copy(l10n_env.__dict__))
         l10n_env.l10n_results[path] = [fm_result, content_result]
         return fm_result, content_result
