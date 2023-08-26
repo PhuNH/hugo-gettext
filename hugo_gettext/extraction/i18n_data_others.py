@@ -21,7 +21,7 @@ def i12ize_data_files(entries: List[Entry], hg_config: Config, mdi: MarkdownIt):
 def i12ize_data_others(entries: List[Entry], hg_config: Config, mdi: MarkdownIt):
     # config fields
     path = 'config.yaml'
-    default_language_config = hg_config.hugo_config['languages']['en']
+    default_language_config = hg_config.hugo_config.get('languages', {}).get('en', {})
     if hg_config.do_title:
         if 'title' not in default_language_config:
             logging.warning(f"Default language config section doesn't have a `title` field.")
