@@ -34,7 +34,8 @@ class _MdCtx:
         self.table_sep = ''
         self.in_table = False
         self.l10n_func: L10NFunc = env['l10n_func']
-        self.hg_config: Config = env['hg_config']
+        # hg_config is only used for processing shortcodes, so not mandatory
+        self.hg_config: Config = env.get('hg_config', None)
 
     def get_line_indent(self):
         if not self.indent_1st_line:
@@ -193,6 +194,12 @@ class RendererMarkdownL10N(RendererProtocol):
         If the first token is of `front_matter` type, `env` must have
         `l10n_results`, `hugo_lang_code`, `l10n_func`, `mdi`, `hg_config`, and `src_strings` attributes.
         Otherwise, only `l10n_func` is required.
+
+        We are rendering whole content files, so if the first token is `front_matter`, it's a content file;
+        and if not, it's an object string. However, in some tests, we skip processing the front matter,
+        so that we don't need to pass in all other fields of L10NEnv, except l10n_func. This means that in
+        these tests, we can't process shortcodes. A test that can process shortcodes has to be given a
+        `front_matter` token.
         """
         if tokens[0].type == 'front_matter':
             fm_result = render_front_matter(tokens[0], env)
