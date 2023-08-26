@@ -18,6 +18,7 @@ from .config import Config
 SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
 SPACES_PATTERN = re.compile(r'\s+')
 SHORTCODE_QUOTES = {'"', '`'}
+HG_STOP = 'hg-stop'
 
 
 def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple[Config, MarkdownIt]:

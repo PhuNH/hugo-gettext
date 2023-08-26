@@ -7,7 +7,7 @@ import inspect
 import textwrap
 from collections.abc import MutableMapping
 from dataclasses import dataclass
-from typing import Sequence, Tuple
+from typing import Sequence, Tuple, List
 
 import pygments.token
 from markdown_it.renderer import RendererProtocol
@@ -18,6 +18,7 @@ from pygments import lexers, util
 from .generation_content import render_front_matter
 from .generation_utils import L10NResult, L10NFunc
 from .. import utils
+from ..config import Config
 
 SETEXT_HEADING_MARKUPS = {'-', '='}
 ORDERED_LIST_MARKUPS = {'.', ')'}
@@ -33,6 +34,7 @@ class _MdCtx:
         self.table_sep = ''
         self.in_table = False
         self.l10n_func: L10NFunc = env['l10n_func']
+        self.hg_config: Config = env['hg_config']
 
     def get_line_indent(self):
         if not self.indent_1st_line:
@@ -139,6 +141,36 @@ def _link_ref(env: MutableMapping, content_result: L10NResult):
         content_result.localized += '\n'
 
 
+def _shortcode(token: Token, sc_params_to_localize: List, l10n_func: L10NFunc, content_result: L10NResult):
+    opening = token.meta['markup']
+    closing = opening if opening == '%' else '>'
+    opening = '{{' + opening
+    closing = closing + '}}'
+    args = ''
+    sc_params = token.meta['params']
+    for param in sc_params:
+        content: str = sc_params[param]
+        quote = content[0]
+        if quote in utils.SHORTCODE_QUOTES:
+            # keep newlines in raw string parameters (passed with ``)
+            if quote == '"':
+                content = utils.SPACES_PATTERN.sub(' ', content)
+            content = content[1:-1]
+        else:
+            quote = ''
+        if param in sc_params_to_localize:
+            localized_content = l10n_func(content)
+            if localized_content is not content:
+                content_result.l10n_count += 1
+            content_result.total_count += 1
+        else:
+            localized_content = content
+        param_name_part = '' if token.meta['is_positional'] else f'{param}='
+        args += f' {param_name_part}{quote}{localized_content}{quote}'
+    # keep no space after the opening to take advantage of HTML highlighting
+    content_result.localized += f"{opening}{token.meta['name']}{args} {closing}"
+
+
 class RendererMarkdownL10N(RendererProtocol):
     __output__ = "md"
 
@@ -173,7 +205,9 @@ class RendererMarkdownL10N(RendererProtocol):
 
         for i, token in enumerate(tokens):
             if token.type in self.rules:
-                self.rules[token.type](tokens, i, md_ctx, content_result)
+                r = self.rules[token.type](tokens, i, md_ctx, content_result)
+                if r == -1:
+                    break
 
         _link_ref(env, content_result)
 
@@ -182,18 +216,26 @@ class RendererMarkdownL10N(RendererProtocol):
     @classmethod
     def inline(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
         token = tokens[idx]
-        content = utils.SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
-        if not content or utils.SPACES_PATTERN.fullmatch(content):
-            localized_content = content
+        if len(token.children) == 1 and (sc := token.children[0]).type == 'shortcode':
+            if sc.meta['name'] == utils.HG_STOP:
+                return -1
+            sc_params_config = md_ctx.hg_config.shortcodes.get('params', {})
+            sc_params_to_localize: List = sc_params_config.get(sc.meta['name'], [])
+            sc_params_to_localize.extend(sc_params_config.get('*', []))
+            _shortcode(sc, sc_params_to_localize, md_ctx.l10n_func, content_result)
         else:
-            localized_content = md_ctx.l10n_func(content)
-        if localized_content is not content:
-            content_result.l10n_count += 1
-        content_result.total_count += 1
-        if md_ctx.in_table:
-            content_result.localized += localized_content
-        else:
-            content_result.localized += f'{md_ctx.get_line_indent()}{localized_content}'
+            content = utils.SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
+            if not content or utils.SPACES_PATTERN.fullmatch(content):
+                localized_content = content
+            else:
+                localized_content = md_ctx.l10n_func(content)
+            if localized_content is not content:
+                content_result.l10n_count += 1
+            content_result.total_count += 1
+            if md_ctx.in_table:
+                content_result.localized += localized_content
+            else:
+                content_result.localized += f'{md_ctx.get_line_indent()}{localized_content}'
 
     # blockquote
     # TODO: blockquote inside list
