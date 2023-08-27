@@ -154,5 +154,8 @@ class Config:
         extensions_config = goldmark_config.get('extensions', {})
         self.parse_definition_list = extensions_config.get('definitionList', True)
         self.parse_table = extensions_config.get('table', True)
+        attribute_config = goldmark_config.get('parser', {}).get('attribute', {})
+        self.parse_attribute_block = attribute_config.get('block', False)
+        self.parse_attribute_title = attribute_config.get('title', True)
 
         self.hugo_config = hugo_config

@@ -9,6 +9,7 @@ import yaml
 
 from markdown_it import MarkdownIt
 from markdown_it.renderer import RendererProtocol
+from mdit_py_hugo.attribute import attribute_plugin
 from mdit_py_hugo.shortcode import shortcode_plugin
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
@@ -28,6 +29,8 @@ def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple
         mdi = mdi.enable('table')
     if hg_config.parse_definition_list:
         mdi = mdi.use(deflist_plugin)
+    if hg_config.parse_attribute_title or hg_config.parse_attribute_block:
+        mdi = mdi.use(attribute_plugin, block=hg_config.parse_attribute_block, title=hg_config.parse_attribute_title)
     return hg_config, mdi
 
 

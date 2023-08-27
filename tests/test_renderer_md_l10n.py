@@ -5,6 +5,8 @@ import unittest
 
 import importlib.resources as pkg_resources
 from markdown_it import MarkdownIt
+from mdit_py_hugo.attribute import attribute_plugin
+from mdit_py_hugo.shortcode import shortcode_plugin
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
 
@@ -12,8 +14,8 @@ from hugo_gettext.generation.renderer_md_l10n import RendererMarkdownL10N
 
 
 class RendererLocalizedMdTestCase(unittest.TestCase):
-    mdi = MarkdownIt(renderer_cls=RendererMarkdownL10N).use(front_matter_plugin) \
-        .enable('table').use(deflist_plugin)
+    mdi = MarkdownIt(renderer_cls=RendererMarkdownL10N).use(front_matter_plugin).use(shortcode_plugin)\
+        .enable('table').use(deflist_plugin).use(attribute_plugin)
 
     def _prep_test(self, f_obj):
         env = {
@@ -45,6 +47,12 @@ class RendererLocalizedMdTestCase(unittest.TestCase):
         with pkg_resources.open_text('tests.resources', 'renderer.md') as f_obj:
             tokens, content_result, localized_tokens = self._prep_test(f_obj)
             self.assertEqual([token.type for token in tokens], [token.type for token in localized_tokens])
+
+    def test_attributes(self):
+        with pkg_resources.open_text('tests.resources', 'attributes.md') as f_obj:
+            tokens, content_result, localized_tokens = self._prep_test(f_obj)
+            self.assertEqual([token.attrs for token in tokens if token.type != 'heading_close'],
+                             [token.attrs for token in localized_tokens if token.type != 'heading_close'])
 
 
 if __name__ == '__main__':

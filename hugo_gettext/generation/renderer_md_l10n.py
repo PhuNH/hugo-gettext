@@ -7,7 +7,7 @@ import inspect
 import textwrap
 from collections.abc import MutableMapping
 from dataclasses import dataclass
-from typing import Sequence, Tuple, List
+from typing import Sequence, Tuple, List, Dict
 
 import pygments.token
 from markdown_it.renderer import RendererProtocol
@@ -31,6 +31,7 @@ class _MdCtx:
         self.indent_1st_line_len = 0
         self.indents = []
         self.setext_heading = ''
+        self.heading_attrs = []
         self.table_sep = ''
         self.in_table = False
         self.l10n_func: L10NFunc = env['l10n_func']
@@ -172,6 +173,25 @@ def _shortcode(token: Token, sc_params_to_localize: List, md_ctx: _MdCtx, conten
     content_result.localized += f"{md_ctx.get_line_indent()}{opening}{token.meta['name']}{args} {closing}"
 
 
+def _attribute_block(attrs: Dict):
+    s = ''
+    for k, v in attrs.items():
+        if k == 'class':
+            for c in v.split(' '):
+                s += f'.{c} '
+        elif k == 'id':
+            s += f'#{v} '
+        else:
+            s += f'{k}="{v}" '
+    return '{' + s + '}'
+
+
+def _attributes(token: Token, md_ctx: _MdCtx, content_result: L10NResult):
+    if token.attrs:
+        attrs_s = _attribute_block(token.attrs)
+        content_result.localized += f'{md_ctx.line_indent}{attrs_s}\n'
+
+
 class RendererMarkdownL10N(RendererProtocol):
     __output__ = "md"
 
@@ -181,6 +201,15 @@ class RendererMarkdownL10N(RendererProtocol):
             for k, v in inspect.getmembers(self, predicate=inspect.ismethod)
             if not (k.startswith("render") or k.startswith("_"))
         }
+
+    # TODO: elements that aren't pure Markdown but Hugo-related:
+    #   hugo_lang_code
+    #   hg_config.excluded_keys
+    #   hg_config.shortcodes
+    #   attributes after blocks and titles:
+    #     'blockquote_close', 'hr', 'bullet_list_close', 'ordered_list_close',
+    #     'paragraph_close', 'table_close', 'dl_close'
+    #     'heading_open', 'heading_close'
 
     def render(
         self, tokens: Sequence[Token], options: OptionsDict, env: MutableMapping
@@ -252,12 +281,10 @@ class RendererMarkdownL10N(RendererProtocol):
         md_ctx.line_indent = f'{md_ctx.get_line_indent()}{token.markup} '
 
     @classmethod
-    def blockquote_close(cls,
-                         _tokens: Sequence[Token],
-                         _idx: int,
-                         md_ctx: _MdCtx,
-                         content_result: L10NResult):
+    def blockquote_close(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
+        token = tokens[idx]
         md_ctx.line_indent = md_ctx.line_indent[:-2]
+        _attributes(token, md_ctx, content_result)
         content_result.localized += f'{md_ctx.line_indent}\n'
 
     # heading
@@ -271,9 +298,15 @@ class RendererMarkdownL10N(RendererProtocol):
             md_ctx.indents.append(0)
         else:
             md_ctx.setext_heading = token.markup
+        if token.attrs:
+            md_ctx.heading_attrs.append(token.attrs)
 
     @classmethod
     def heading_close(cls, _tokens: Sequence[Token], _idx: int, md_ctx: _MdCtx, content_result: L10NResult):
+        if md_ctx.heading_attrs:
+            attrs_s = _attribute_block(md_ctx.heading_attrs.pop())
+            content_result.localized += attrs_s
+
         if md_ctx.setext_heading:
             content_result.localized += f'\n{md_ctx.get_line_indent()}{md_ctx.setext_heading}'
             md_ctx.setext_heading = ''
@@ -288,6 +321,7 @@ class RendererMarkdownL10N(RendererProtocol):
         token = tokens[idx]
         # always use '_' here to differentiate this from setext headings and bullet list items
         content_result.localized += f'{md_ctx.get_line_indent()}{len(token.markup) * "_"}\n'
+        _attributes(token, md_ctx, content_result)
 
     # list
     # TODO: loose lists?
@@ -316,6 +350,8 @@ class RendererMarkdownL10N(RendererProtocol):
                           idx: int,
                           md_ctx: _MdCtx,
                           content_result: L10NResult):
+        token = tokens[idx]
+        _attributes(token, md_ctx, content_result)
         # add a blank line when next token is not a closing one
         if idx < len(tokens) - 1 and tokens[idx + 1].nesting != -1:
             content_result.localized += f'{md_ctx.line_indent}\n'
@@ -326,6 +362,8 @@ class RendererMarkdownL10N(RendererProtocol):
                            idx: int,
                            md_ctx: _MdCtx,
                            content_result: L10NResult):
+        token = tokens[idx]
+        _attributes(token, md_ctx, content_result)
         # add a blank line when next token is not a closing one
         if idx < len(tokens) - 1 and tokens[idx + 1].nesting != -1:
             content_result.localized += f'{md_ctx.line_indent}\n'
@@ -333,7 +371,9 @@ class RendererMarkdownL10N(RendererProtocol):
     # paragraph
     @classmethod
     def paragraph_close(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
+        token = tokens[idx]
         content_result.localized += '\n'
+        _attributes(token, md_ctx, content_result)
         if idx < len(tokens) - 1:
             next_token = tokens[idx + 1]
             # add a blank line when next token is a setext heading_open, an indented code block, a paragraph open,
@@ -408,7 +448,9 @@ class RendererMarkdownL10N(RendererProtocol):
         content_result.localized += '\n'
 
     @classmethod
-    def table_close(cls, _tokens: Sequence[Token], _idx: int, md_ctx: _MdCtx, content_result: L10NResult):
+    def table_close(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
+        token = tokens[idx]
+        _attributes(token, md_ctx, content_result)
         content_result.localized += f'{md_ctx.line_indent}\n'
         md_ctx.in_table = False
 
@@ -421,9 +463,11 @@ class RendererMarkdownL10N(RendererProtocol):
         md_ctx.indents.append(2)
 
     @classmethod
-    def dd_close(cls, _tokens: Sequence[Token], _idx: int, md_ctx: _MdCtx, content_result: L10NResult):
+    def dd_close(cls, tokens: Sequence[Token], idx: int, md_ctx: _MdCtx, content_result: L10NResult):
         latest_len = md_ctx.indents.pop()
         md_ctx.line_indent = md_ctx.line_indent[:-latest_len]
+        if idx + 1 < len(tokens) and (token := tokens[idx+1]).type == 'dl_close':
+            _attributes(token, md_ctx, content_result)
         content_result.localized += f'{md_ctx.line_indent}\n'
 
     @classmethod
