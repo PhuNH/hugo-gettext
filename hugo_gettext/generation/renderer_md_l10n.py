@@ -142,7 +142,7 @@ def _link_ref(env: MutableMapping, content_result: L10NResult):
         content_result.localized += '\n'
 
 
-def _shortcode(token: Token, sc_params_to_localize: List, l10n_func: L10NFunc, content_result: L10NResult):
+def _shortcode(token: Token, sc_params_to_localize: List, md_ctx: _MdCtx, content_result: L10NResult):
     opening = token.meta['markup']
     closing = opening if opening == '%' else '>'
     opening = '{{' + opening
@@ -160,7 +160,7 @@ def _shortcode(token: Token, sc_params_to_localize: List, l10n_func: L10NFunc, c
         else:
             quote = ''
         if param in sc_params_to_localize:
-            localized_content = l10n_func(content)
+            localized_content = md_ctx.l10n_func(content)
             if localized_content is not content:
                 content_result.l10n_count += 1
             content_result.total_count += 1
@@ -169,7 +169,7 @@ def _shortcode(token: Token, sc_params_to_localize: List, l10n_func: L10NFunc, c
         param_name_part = '' if token.meta['is_positional'] else f'{param}='
         args += f' {param_name_part}{quote}{localized_content}{quote}'
     # keep no space after the opening to take advantage of HTML highlighting
-    content_result.localized += f"{opening}{token.meta['name']}{args} {closing}"
+    content_result.localized += f"{md_ctx.get_line_indent()}{opening}{token.meta['name']}{args} {closing}"
 
 
 class RendererMarkdownL10N(RendererProtocol):
@@ -229,7 +229,7 @@ class RendererMarkdownL10N(RendererProtocol):
             sc_params_config = md_ctx.hg_config.shortcodes.get('params', {})
             sc_params_to_localize: List = sc_params_config.get(sc.meta['name'], [])
             sc_params_to_localize.extend(sc_params_config.get('*', []))
-            _shortcode(sc, sc_params_to_localize, md_ctx.l10n_func, content_result)
+            _shortcode(sc, sc_params_to_localize, md_ctx, content_result)
         else:
             content = utils.SPACES_PATTERN.sub(' ', token.content.replace('\n', ' '))
             if not content or utils.SPACES_PATTERN.fullmatch(content):
