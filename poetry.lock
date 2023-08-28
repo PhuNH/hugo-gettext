@@ -85,7 +85,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "75343f77581be65e559ed31dabff540d2965d5ee8a394585eaf74c4eb9ca1db5"
+content-hash = "cca06c9442e17ec6a27488f3b6bb62e7ae200a5f55e1bb660344f40662bb57e5"
 
 [metadata.files]
 markdown-it-py = [
