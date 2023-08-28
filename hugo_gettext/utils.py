@@ -6,7 +6,6 @@ import re
 from typing import Tuple, Dict, Type
 
 import yaml
-
 from markdown_it import MarkdownIt
 from markdown_it.renderer import RendererProtocol
 from mdit_py_hugo.attribute import attribute_plugin
