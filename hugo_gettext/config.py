@@ -103,7 +103,7 @@ class Config:
     _cache: 'Config' = None
 
     @classmethod
-    def get(cls) -> 'Config':
+    def retrieve(cls) -> 'Config':
         if cls._cache:
             return cls._cache
         else:

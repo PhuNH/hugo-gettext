@@ -27,7 +27,7 @@ def generate_data_files(src_data: Dict, hugo_lang_code: str, l10n_func: L10NFunc
         target_file = f'data{lang_prefix}/{src_sub_path}'
         os.makedirs(os.path.dirname(target_file), exist_ok=True)
 
-        o_result = localize_object(data, Config.get().excluded_data_keys, hugo_lang_code, l10n_func, mdi)
+        o_result = localize_object(data, Config.retrieve().excluded_data_keys, hugo_lang_code, l10n_func, mdi)
         if o_result.l10n_count > 0:
             with open(target_file, 'w+') as f_target:
                 f_target.write(yaml.dump(data, default_flow_style=False, allow_unicode=True))
@@ -61,7 +61,7 @@ def write_strings(target_strings, hugo_lang_code):
 
 
 def localize_languages(lang_names: Dict, lang_code: str, hugo_lang_code: str):
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     hugo_config = hg_config.hugo_config
     if hugo_lang_code not in hugo_config['languages']:
         hugo_config['languages'][hugo_lang_code] = {}
@@ -105,7 +105,7 @@ def generate_data_others(lang_code: str, file_total_count: int, file_l10n_count:
     """
     hugo_lang_code = l10n_env.hugo_lang_code
     l10n_func = l10n_env.l10n_func
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     src_strings = l10n_env.src_strings
     strings_ok = True
     if hg_config.do_strings and src_strings is not None:

@@ -247,7 +247,7 @@ class RendererMarkdownL10N(RendererProtocol):
         if len(token.children) == 1 and (sc := token.children[0]).type == 'shortcode':
             if sc.meta['name'] == utils.HG_STOP:
                 return -1
-            sc_params_config = Config.get().shortcodes.get('params', {})
+            sc_params_config = Config.retrieve().shortcodes.get('params', {})
             sc_params_to_localize: List = sc_params_config.get(sc.meta['name'], [])
             sc_params_to_localize.extend(sc_params_config.get('*', []))
             _shortcode(sc, sc_params_to_localize, md_ctx, content_result)

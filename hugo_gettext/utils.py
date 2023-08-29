@@ -34,7 +34,7 @@ def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple
 
 
 def read_data_files() -> Dict:
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     src_data = {}
     for path in hg_config.data:
         if not os.path.isfile(path):

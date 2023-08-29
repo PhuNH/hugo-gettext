@@ -47,7 +47,7 @@ class Entry:
 
 
 def make_pot(entries: List[Entry], dest_path: str):
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     pot = polib.POFile(check_for_duplicates=True)
     pot.metadata = {
         'Project-Id-Version': f'{hg_config.package} 1.0',

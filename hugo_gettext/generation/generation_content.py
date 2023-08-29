@@ -30,7 +30,7 @@ def render_content_file(path: str,
 
 
 def process_fm_conditions(fm: Dict, l10n_env: L10NEnv):
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     l10n_results = l10n_env.l10n_results
     src_strings = l10n_env.src_strings
     i18n_conditions = fm.get('i18n_configs', {}).get('conditions', [])
@@ -82,7 +82,7 @@ def render_front_matter(token: Token, env: MutableMapping) -> L10NResult:
 
     fm = yaml.safe_load(token.content)
 
-    fm_result = localize_object(fm, Config.get().excluded_keys, l10n_env.hugo_lang_code, l10n_env.l10n_func)
+    fm_result = localize_object(fm, Config.retrieve().excluded_keys, l10n_env.hugo_lang_code, l10n_env.l10n_func)
     process_fm_conditions(fm, l10n_env)
 
     rendered_localized_fm = yaml.dump(fm, default_flow_style=False, allow_unicode=True)
@@ -95,7 +95,7 @@ def render_front_matter(token: Token, env: MutableMapping) -> L10NResult:
 
 
 def write_content_file(fm: str, content: str, src_path: str, hugo_lang_code: str):
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     if hg_config.gen_to_other_dir:
         target_path = src_path.replace(f'{hg_config.src_dir}/',
                                        f'{hg_config.gen_dir}/{hugo_lang_code}/')

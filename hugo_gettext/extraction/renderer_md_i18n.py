@@ -54,7 +54,7 @@ class RendererMarkdownI18N(RendererProtocol):
 
         # TODO support i12izing front matter as markdown
         i18n_env.mdi = None
-        i12ize_object(fm, Config.get().excluded_keys, i18n_env)
+        i12ize_object(fm, Config.retrieve().excluded_keys, i18n_env)
 
     @classmethod
     def inline(cls, tokens: Sequence[Token], idx: int, i18n_env: I18NEnv):
@@ -63,7 +63,7 @@ class RendererMarkdownI18N(RendererProtocol):
         if len(token.children) == 1 and (sc := token.children[0]).type == 'shortcode':
             if sc.meta['name'] == utils.HG_STOP:
                 return -1
-            sc_params_config = Config.get().shortcodes.get('params', {})
+            sc_params_config = Config.retrieve().shortcodes.get('params', {})
             sc_params_to_i12ize: List = sc_params_config.get(sc.meta['name'], [])
             sc_params_to_i12ize.extend(sc_params_config.get('*', []))
             sc_params_used = sc.meta['params']

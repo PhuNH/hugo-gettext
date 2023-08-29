@@ -14,12 +14,12 @@ from ..config import Config
 
 def i12ize_data_files(entries: List[Entry], mdi: MarkdownIt):
     for path, data in utils.read_data_files().items():
-        i12ize_object(data, Config.get().excluded_data_keys, I18NEnv(path, entries, mdi))
+        i12ize_object(data, Config.retrieve().excluded_data_keys, I18NEnv(path, entries, mdi))
         logging.info(path)
 
 
 def i12ize_data_others(entries: List[Entry], mdi: MarkdownIt):
-    hg_config = Config.get()
+    hg_config = Config.retrieve()
     # config fields
     path = 'config.yaml'
     default_language_config = hg_config.hugo_config.get('languages', {}).get('en', {})
