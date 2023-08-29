@@ -14,8 +14,10 @@ from .. import utils
 
 
 def generate(args):
-    """
-    Generate target messages and files
+    """Generate target messages and files
+    :param args: arguments passed in command line, containing
+        - customs (optional): path to Python file containing custom functions
+        - keep_locale (optional): do not delete locale folder
     :return: None
     """
     hg_config, mdi = utils.initialize(args.customs, RendererMarkdownL10N)

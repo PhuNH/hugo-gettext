@@ -52,7 +52,6 @@ class RendererMarkdownI18N(RendererProtocol):
 
         fm = yaml.safe_load(token.content)
 
-        # TODO support i12izing front matter as markdown
         i18n_env.mdi = None
         i12ize_object(fm, Config.retrieve().excluded_keys, i18n_env)
 

@@ -23,7 +23,7 @@ def localize_object_string(s: str, l10n_func: L10NFunc, mdi: MarkdownIt) -> L10N
         _, content_result = mdi.render(s, env)
     else:
         localized_s = l10n_func(s)
-        # in front matter only count translations that are different from source messages
+        # in front matters only count translations that are different from source messages
         l10n_count = 1 if s != localized_s else 0
         content_result = L10NResult(localized_s, 1, l10n_count)
     return content_result
@@ -34,9 +34,9 @@ def localize_object(o,
                     hugo_lang_code: str,
                     l10n_func: L10NFunc,
                     mdi: MarkdownIt = None) -> L10NResult:
-    """Localize an object, either in front matter or in data files.
+    """Localize an object, either in front matters or in data files.
     :param o: the object being processed
-    :param excluded_keys: values of these keys are not processed
+    :param excluded_keys: a set of keys whose values are not processed
     :param hugo_lang_code: only used to prepend language code to absolute aliases
     :param l10n_func: a `gettext.gettext` function
     :param mdi: `MarkdownIt` object used to localize string as Markdown if provided

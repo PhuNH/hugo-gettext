@@ -7,10 +7,9 @@ import subprocess
 
 
 def compile_po(args):
-    """
-    Compile translated messages to binary format stored in 'locale/{lang}/LC_MESSAGES' directory
+    """Compile translated messages to binary format stored in 'locale/{lang}/LC_MESSAGES' directory
     :param args: arguments passed in command line, containing
-        - dir: path of the directory containing subdirectories with PO files inside, in the form of {lang}/*.po
+        - dir: path of the directory containing subdirectories with PO files inside, in the form of {dir}/{lang}/*.po
     :return: None
     """
     po_dir = args.dir

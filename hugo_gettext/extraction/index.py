@@ -11,11 +11,12 @@ from .. import utils
 
 
 def extract(args):
-    """
-    Extract messages from source files
+    """Extract messages from source files
     :param args: arguments passed in command line, containing
-        - pot: either path of the only target pot file or path of the directory containing the target pot file(s)
-    :return: None
+        - pot: path of the directory containing the target pot file(s)
+        - customs (optional): path to Python file containing custom functions
+    :return: None. Data, config fields, and strings are extracted to the default domain,
+    while content files are extracted to configured domains.
     """
     hg_config, mdi = utils.initialize(args.customs, RendererMarkdownI18N)
     dest = args.pot

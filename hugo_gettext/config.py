@@ -11,8 +11,7 @@ import yaml
 
 
 def _read_domain_config(domain_config) -> List[str]:
-    """
-    Get files of a domain
+    """Get files of a domain
     :param domain_config: config of the domain to read
     :return: list of files of the domain
     """
@@ -35,8 +34,7 @@ def _read_domain_config(domain_config) -> List[str]:
 
 
 def _read_data_config(i18n_config) -> List[str]:
-    """
-    Retrieve a list of data files to extract
+    """Retrieve a list of data files to extract
     :param i18n_config: the i18n config section
     :return: a list of file paths
     """
@@ -44,8 +42,7 @@ def _read_data_config(i18n_config) -> List[str]:
 
 
 def _read_content_config(i18n_config) -> Dict[str, List[str]]:
-    """
-    Retrieve lists of content files, grouped by domains
+    """Retrieve lists of content files, grouped by domains
     :param i18n_config: the i18n config section
     :return: a dict with domain names as keys and file lists as values
     """
@@ -156,7 +153,6 @@ class Config:
         self.content = _read_content_config(i18n_config)
         self.excluded_data_keys = set(i18n_config.get('excludedDataKeys', '').split())
         self.excluded_keys = excluded_keys | custom_excluded_keys | set(i18n_config.get('excludedKeys', '').split())
-        self.langs = i18n_config.get('langs', '').split()
         self.shortcodes = i18n_config.get('shortcodes', {})
 
         goldmark_config = hugo_config.get('markup', {}).get('goldmark', {})

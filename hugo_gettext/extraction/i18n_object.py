@@ -9,9 +9,12 @@ from .extraction_utils import I18NEnv
 
 
 def i12ize_object(o, excluded_keys: Set[str], i18n_env: I18NEnv):
-    """Internationalize an object, either in front matter or in data files.
+    """Internationalize an object, either in front matters or in data files.
     :param o: the object being processed
-    :param i18n_env: the I18NEnv object. Values of keys in i18n_env.hg_config.excluded_keys are not processed
+    :param excluded_keys: a set of keys whose values are not processed
+    :param i18n_env: the I18NEnv object containing:
+        - `with_line`: will be set to False. We can only get line numbers with Markdown in content files, not in objects
+        - mdi: used to i12ize a string as Markdown if provided
     :return: None. Messages are added to the `i18n_env.entries` list.
     """
     if isinstance(o, str):

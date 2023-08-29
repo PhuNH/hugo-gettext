@@ -15,8 +15,7 @@ def gettext_func(domain_name):
 
 
 class L10NResult:
-    """
-    Localized content, total number of messages, number of translations.
+    """Localized content, total number of messages, number of translations.
     If there are no messages, rate will be -1
     """
     def __init__(self, localized, total_count: int, l10n_count: int):
