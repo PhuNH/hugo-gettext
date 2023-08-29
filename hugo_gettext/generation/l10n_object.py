@@ -45,8 +45,6 @@ def localize_object(o,
     # TODO: handle aliases here or where?
     total_count, l10n_count = 0, 0
 
-    # TODO: with parsing front matter as markdown
-    # if isinstance(o, str):
     if isinstance(o, list):
         for index, item in enumerate(o):
             if isinstance(item, str):

@@ -7,8 +7,6 @@ from typing import Callable, Dict, List, MutableMapping
 
 from markdown_it import MarkdownIt
 
-from ..config import Config
-
 
 def gettext_func(domain_name):
     gettext.bindtextdomain(domain_name, 'locale')
@@ -49,11 +47,10 @@ class L10NEnv:
     hugo_lang_code: str
     l10n_func: L10NFunc
     mdi: MarkdownIt
-    hg_config: Config
     src_strings: Dict
 
     @classmethod
     def from_env(cls, env: MutableMapping):
         return cls(env['l10n_results'],
                    env['hugo_lang_code'], env['l10n_func'], env['mdi'],
-                   env['hg_config'], env['src_strings'])
+                   env['src_strings'])

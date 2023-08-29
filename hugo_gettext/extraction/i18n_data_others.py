@@ -12,13 +12,14 @@ from .. import utils
 from ..config import Config
 
 
-def i12ize_data_files(entries: List[Entry], hg_config: Config, mdi: MarkdownIt):
-    for path, data in utils.read_data_files(hg_config).items():
-        i12ize_object(data, hg_config.excluded_data_keys, I18NEnv(path, entries, hg_config, mdi))
+def i12ize_data_files(entries: List[Entry], mdi: MarkdownIt):
+    for path, data in utils.read_data_files().items():
+        i12ize_object(data, Config.get().excluded_data_keys, I18NEnv(path, entries, mdi))
         logging.info(path)
 
 
-def i12ize_data_others(entries: List[Entry], hg_config: Config, mdi: MarkdownIt):
+def i12ize_data_others(entries: List[Entry], mdi: MarkdownIt):
+    hg_config = Config.get()
     # config fields
     path = 'config.yaml'
     default_language_config = hg_config.hugo_config.get('languages', {}).get('en', {})
@@ -37,7 +38,7 @@ def i12ize_data_others(entries: List[Entry], hg_config: Config, mdi: MarkdownIt)
             entries.append(Entry(menu_entry['name'], Occurrence(path, 0)))
     # data
     if hg_config.data:
-        i12ize_data_files(entries, hg_config, mdi)
+        i12ize_data_files(entries, mdi)
     # strings
     if hg_config.do_strings:
         path = 'i18n/en.yaml'

@@ -21,7 +21,7 @@ def generate(args):
     hg_config, mdi = utils.initialize(args.customs, RendererMarkdownL10N)
     src_strings = utils.read_strings()
     original_hugo_config = copy.deepcopy(hg_config.hugo_config)
-    src_data = utils.read_data_files(hg_config)
+    src_data = utils.read_data_files()
 
     lang_names = hg_config.load_lang_names()
     file_total_count = sum([len(x) for _, x in hg_config.content.items()])
@@ -33,7 +33,7 @@ def generate(args):
         default_func = None
         l10n_results: L10NResults = {}
 
-        for domain in hg_config.content:
+        for domain, domain_paths in hg_config.content.items():
             domain_name = domain if domain != 'default' else hg_config.default_domain_name
             mo_path = f'locale/{lang_code}/LC_MESSAGES/{domain_name}.mo'
             if os.path.isfile(mo_path):
@@ -45,8 +45,8 @@ def generate(args):
                 def l10n_func(x): return x
             if domain_name == hg_config.default_domain_name:
                 default_func = l10n_func
-            l10n_env = L10NEnv(l10n_results, hugo_lang_code, l10n_func, mdi, hg_config, src_strings)
-            file_l10n_count += generate_content_domain(domain, l10n_env)
+            l10n_env = L10NEnv(l10n_results, hugo_lang_code, l10n_func, mdi, src_strings)
+            file_l10n_count += generate_content_domain(domain_paths, l10n_env)
         if default_func is None:
             mo_path = f'locale/{lang_code}/LC_MESSAGES/{hg_config.default_domain_name}.mo'
             if os.path.isfile(mo_path):
@@ -58,7 +58,7 @@ def generate(args):
         logging.info(f'{hugo_lang_code} [{file_l10n_count}/{file_total_count}]')
 
         if default_func is not None:
-            l10n_env = L10NEnv(l10n_results, hugo_lang_code, default_func, mdi, hg_config, src_strings)
+            l10n_env = L10NEnv(l10n_results, hugo_lang_code, default_func, mdi, src_strings)
             generate_data_others(lang_code, file_total_count, file_l10n_count, l10n_env, lang_names, src_data)
     if not args.keep_locale:
         shutil.rmtree('locale')

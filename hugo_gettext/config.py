@@ -100,6 +100,15 @@ def _get_pot_fields() -> Dict[str, str]:
 
 
 class Config:
+    _cache: 'Config' = None
+
+    @classmethod
+    def get(cls) -> 'Config':
+        if cls._cache:
+            return cls._cache
+        else:
+            raise ValueError('Config has not been read. Please check if your config file is valid.')
+
     def __init__(self, customs_path: str = ''):
         with open('config.yaml') as f:
             hugo_config = yaml.safe_load(f)
@@ -159,3 +168,4 @@ class Config:
         self.parse_attribute_title = attribute_config.get('title', True)
 
         self.hugo_config = hugo_config
+        Config._cache = self

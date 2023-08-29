@@ -46,7 +46,8 @@ class Entry:
                     pass
 
 
-def make_pot(entries: List[Entry], dest_path: str, hg_config: Config):
+def make_pot(entries: List[Entry], dest_path: str):
+    hg_config = Config.get()
     pot = polib.POFile(check_for_duplicates=True)
     pot.metadata = {
         'Project-Id-Version': f'{hg_config.package} 1.0',
@@ -68,13 +69,12 @@ def make_pot(entries: List[Entry], dest_path: str, hg_config: Config):
 class I18NEnv:
     src_path: str
     entries: List[Entry]
-    hg_config: Config
     mdi: MarkdownIt
     with_line: bool = True
 
     @classmethod
     def from_env(cls, env: MutableMapping):
-        return cls(env['src_path'], env['entries'], env['hg_config'], env['mdi'], env['with_line'])
+        return cls(env['src_path'], env['entries'], env['mdi'], env['with_line'])
 
     def add_entry(self, msgid: str, line_num: int, comment: str = ''):
         line_num = line_num if self.with_line else 0

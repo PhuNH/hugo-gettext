@@ -33,7 +33,8 @@ def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple
     return hg_config, mdi
 
 
-def read_data_files(hg_config: Config) -> Dict:
+def read_data_files() -> Dict:
+    hg_config = Config.get()
     src_data = {}
     for path in hg_config.data:
         if not os.path.isfile(path):

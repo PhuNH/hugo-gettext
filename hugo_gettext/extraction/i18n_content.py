@@ -9,7 +9,6 @@ from typing import List
 from markdown_it import MarkdownIt
 
 from .extraction_utils import Entry, I18NEnv
-from ..config import Config
 
 
 def i12ize_content_file(i18n_env: I18NEnv):
@@ -18,8 +17,8 @@ def i12ize_content_file(i18n_env: I18NEnv):
         i18n_env.mdi.render(f_content.read(), copy.copy(i18n_env.__dict__))
 
 
-def i12ize_content_domain(domain: str, entries: List[Entry], hg_config: Config, mdi: MarkdownIt):
-    for src_path in hg_config.content[domain]:
+def i12ize_content_domain(domain_paths: List[str], entries: List[Entry], mdi: MarkdownIt):
+    for src_path in domain_paths:
         if os.path.isfile(src_path):
-            i12ize_content_file(I18NEnv(src_path, entries, hg_config, mdi))
+            i12ize_content_file(I18NEnv(src_path, entries, mdi))
             logging.info(src_path)
