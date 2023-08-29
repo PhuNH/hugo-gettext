@@ -14,7 +14,7 @@ from ..config import Config
 
 def i12ize_data_files(entries: List[Entry], hg_config: Config, mdi: MarkdownIt):
     for path, data in utils.read_data_files(hg_config).items():
-        i12ize_object(data, I18NEnv(path, entries, hg_config, mdi))
+        i12ize_object(data, hg_config.excluded_data_keys, I18NEnv(path, entries, hg_config, mdi))
         logging.info(path)
 
 

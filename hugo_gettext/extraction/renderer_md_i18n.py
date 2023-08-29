@@ -53,7 +53,7 @@ class RendererMarkdownI18N(RendererProtocol):
 
         # TODO support i12izing front matter as markdown
         i18n_env.mdi = None
-        i12ize_object(fm, i18n_env)
+        i12ize_object(fm, i18n_env.hg_config.excluded_keys, i18n_env)
 
     @classmethod
     def inline(cls, tokens: Sequence[Token], idx: int, i18n_env: I18NEnv):
