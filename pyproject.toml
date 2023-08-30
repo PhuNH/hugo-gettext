@@ -6,14 +6,13 @@ name = "hugo-gettext"
 version = "0.3.0"
 description = "I18n with gettext for Hugo"
 authors = ["Phu Hung Nguyen <phuhnguyen@outlook.com>"]
-license = "GPL-3.0-or-later"
+license = "LGPL-2.1-or-later"
 readme = "README.md"
 repository = "https://github.com/phunh/hugo-gettext"
 classifiers = [
     "Development Status :: 3 - Alpha",
     "Intended Audience :: Developers",
     "Topic :: Software Development :: Internationalization",
-    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3"
 ]
@@ -29,7 +28,6 @@ PyYAML = "^6.0.1"
 [tool.poetry.scripts]
 hugo-gettext = 'hugo_gettext.cli:main'
 hugo-i18n = 'hugo_gettext.cli:main'
-
 
 [build-system]
 requires = ["poetry-core"]
