@@ -3,22 +3,53 @@
 
 import os
 import re
-from typing import Tuple, Dict, Type
+from typing import Tuple, Dict, Type, Protocol, Any
 
 import yaml
 from markdown_it import MarkdownIt
 from markdown_it.renderer import RendererProtocol
 from mdit_py_hugo.attribute import attribute_plugin
 from mdit_py_hugo.shortcode import shortcode_plugin
+from mdit_py_i18n.utils import DomainGenerationProtocol, DomainExtractionProtocol
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
 
 from .config import Config
 
 SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
-SPACES_PATTERN = re.compile(r'\s+')
 SHORTCODE_QUOTES = {'"', '`'}
 HG_STOP = 'hg-stop'
+
+
+class HugoEProtocol(Protocol):
+    hg_config: Any
+    mdi: MarkdownIt
+
+
+class HugoGProtocol(Protocol):
+    src_strings: Dict
+    src_data: Dict
+    lang_names: Dict
+    file_total_count: int
+    hg_config: Any
+    mdi: MarkdownIt
+
+
+class HugoLangGProtocol(Protocol):
+    g: HugoGProtocol
+    hugo_lang_code: str
+    l10n_results: Dict
+
+    def localize_strings(self):
+        ...
+
+
+class HugoDomainEProtocol(DomainExtractionProtocol):
+    e: HugoEProtocol
+
+
+class HugoDomainGProtocol(DomainGenerationProtocol):
+    lang_g: HugoLangGProtocol
 
 
 def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple[Config, MarkdownIt]:
