@@ -74,7 +74,7 @@ def _get_customs_functions(customs_path: str) -> Dict[str, Callable]:
     return {f[0]: f[1] for f in functions}
 
 
-def _load_lang_names() -> Dict:
+def _load_lang_names() -> Dict[str, str]:
     return {}
 
 
@@ -98,6 +98,10 @@ def _get_pot_fields() -> Dict[str, str]:
     }
 
 
+def _get_rtl_langs() -> List[str]:
+    return []
+
+
 class Config:
     def __init__(self, customs_path):
         with open('config.yaml') as f:
@@ -115,11 +119,13 @@ class Config:
         customs_path = customs_path or i18n_config.get('customs', '')
         customs_functions = _get_customs_functions(customs_path)
         # value directly set in config file > value gotten by calling custom function
+        #   default_domain_name
         if default_domain_name := i18n_config.get('defaultDomain', ''):
             self.default_domain_name = default_domain_name
         else:
             get_default_domain_name = customs_functions.get('get_default_domain_name', _get_default_domain_name)
             self.default_domain_name = get_default_domain_name(self.package)
+        #   report_address and team_address
         get_pot_fields = customs_functions.get('get_pot_fields', _get_pot_fields)
         pot_fields = get_pot_fields()
         if report_address := i18n_config.get('reportAddress', ''):
@@ -130,6 +136,14 @@ class Config:
             self.team_address = team_address
         else:
             self.team_address = pot_fields.get('team_address', '')
+        #   rtl_langs
+        get_rtl_langs = customs_functions.get('get_rtl_langs', _get_rtl_langs)
+        if rtl_langs := i18n_config.get('rtlLangs', []):
+            self.rtl_langs = rtl_langs
+        else:
+            self.rtl_langs = get_rtl_langs()
+
+        # custom functions with no corresponding config fields
         get_custom_excluded_keys = customs_functions.get('get_custom_excluded_keys', _get_custom_excluded_keys)
         custom_excluded_keys = get_custom_excluded_keys()
         self.load_lang_names = customs_functions.get('load_lang_names', _load_lang_names)

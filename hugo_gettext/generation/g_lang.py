@@ -15,8 +15,6 @@ from .g_domain import HugoDomainG
 from ..utils import HugoGProtocol
 
 L10NResults = Dict[str, List[L10NResult]]
-# TODO: how to handle this?
-RTL_LANGUAGES = {'ar', 'he'}
 
 
 class HugoLangG:
@@ -68,7 +66,7 @@ class HugoLangG:
         if hugo_lang_code in self.g.lang_names:
             hugo_config['languages'][hugo_lang_code]['languageName'] = self.g.lang_names[hugo_lang_code]
 
-        if hugo_lang_code in RTL_LANGUAGES:
+        if hugo_lang_code in hg_config.rtl_langs:
             hugo_config['languages'][hugo_lang_code]['languagedirection'] = 'rtl'
 
         if hg_config.gen_to_other_dir:
