@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "hugo-gettext"
-version = "0.4.0"
+version = "0.4.1"
 description = "I18n with gettext for Hugo"
 authors = ["Phu Hung Nguyen <phuhnguyen@outlook.com>"]
 license = "LGPL-2.1-or-later"
@@ -20,7 +20,7 @@ packages = [{include = "hugo_gettext"}]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-mdit-py-i18n = "^0.1.1"
+mdit-py-i18n = "^0.1.2"
 markdown-gettext = "^0.1.2"
 mdit-py-hugo = "^0.3.1"
 

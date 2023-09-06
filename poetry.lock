@@ -47,7 +47,7 @@ mdit-py-plugins = ">=0.4.0,<0.5.0"
 
 [[package]]
 name = "mdit-py-i18n"
-version = "0.1.1"
+version = "0.1.2"
 description = "Markdown i18n and l10n using markdown-it-py"
 category = "main"
 optional = false
@@ -111,7 +111,7 @@ python-versions = ">=3.6"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.8"
-content-hash = "8923ac4839efffbd960834bb1ea54640b8e63cbebcb57d140c6ba1e916390675"
+content-hash = "0aae798bb449f3d10617562a85ea0e3506f59353ee20a2962c0565dc53008094"
 
 [metadata.files]
 markdown-gettext = [
@@ -127,8 +127,8 @@ mdit-py-hugo = [
     {file = "mdit_py_hugo-0.3.1-py3-none-any.whl", hash = "sha256:53b9f09500cf8b74efb46f18b060a8a57e6397414d8cc4abf965f333de1e3bce"},
 ]
 mdit-py-i18n = [
-    {file = "mdit-py-i18n-0.1.1.tar.gz", hash = "sha256:4f8101fb0cd6ae5efe77fe0239f0a93c02009e570505635908daeb279a1de853"},
-    {file = "mdit_py_i18n-0.1.1-py3-none-any.whl", hash = "sha256:52bba5a137a5b3038c52ccb252f2cf9f56e43ced4f263c79ad271d1c0bd9a26f"},
+    {file = "mdit-py-i18n-0.1.2.tar.gz", hash = "sha256:aede3a60403f66d149483bdbe6f61402260a889c0daa42f400677be6fdd5db9c"},
+    {file = "mdit_py_i18n-0.1.2-py3-none-any.whl", hash = "sha256:dbab4efc6a5f2998ebc6b3e20194375658f278be07d639e36ba5b0c07e988194"},
 ]
 mdit-py-plugins = [
     {file = "mdit_py_plugins-0.4.0-py3-none-any.whl", hash = "sha256:b51b3bb70691f57f974e257e367107857a93b36f322a9e6d44ca5bf28ec2def9"},
