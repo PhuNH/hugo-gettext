@@ -6,7 +6,6 @@ import os
 import shutil
 from typing import Dict
 
-import yaml
 from markdown_it import MarkdownIt
 
 from .g_lang import HugoLangG
@@ -55,5 +54,4 @@ def generate(args):
     Generation(src_strings, src_data, hg_config, mdi).generate(args.keep_locale)
 
     if hg_config.hugo_config != original_hugo_config:
-        with open('config.yaml', 'w+') as f_config:
-            f_config.write(yaml.dump(hg_config.hugo_config, default_flow_style=False, allow_unicode=True))
+        utils.write_file(hg_config.config_path, hg_config.hugo_config)

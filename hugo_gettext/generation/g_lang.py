@@ -12,6 +12,7 @@ from markdown_gettext.domain_generation import gettext_func
 from mdit_py_i18n.utils import L10NResult
 
 from .g_domain import HugoDomainG
+from .. import utils
 from ..utils import HugoGProtocol
 
 L10NResults = Dict[str, List[L10NResult]]
@@ -102,8 +103,7 @@ class HugoLangG:
 
             o_result = self.default_domain_g.localize_object(data, self.g.hg_config.excluded_data_keys, self.g.mdi)
             if o_result.l10n_count > 0:
-                with open(target_path, 'w+') as f_target:
-                    f_target.write(yaml.dump(data, default_flow_style=False, allow_unicode=True))
+                utils.write_file(target_path, data)
 
     def generate_data_others(self):
         """Generate strings file and data files, and localize config fields.

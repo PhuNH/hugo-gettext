@@ -23,7 +23,7 @@ python = "^3.8"
 mdit-py-i18n = "^0.1.2"
 markdown-gettext = "^0.1.2"
 mdit-py-hugo = "^0.3.1"
-pytomlpp = "^1.0.13"
+tomlkit = "^0.12.1"
 
 [tool.poetry.scripts]
 hugo-gettext = 'hugo_gettext.cli:main'

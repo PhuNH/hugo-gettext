@@ -6,7 +6,7 @@ import re
 from enum import Enum
 from typing import Dict, Protocol, Any, List
 
-import pytomlpp
+import tomlkit
 import yaml
 from markdown_it import MarkdownIt
 from mdit_py_i18n.utils import DomainGenerationProtocol, DomainExtractionProtocol
@@ -65,15 +65,29 @@ class TextFormat(Enum):
         if self == TextFormat.YAML:
             return yaml.safe_load(content)
         elif self == TextFormat.TOML:
-            return pytomlpp.loads(content)
+            return tomlkit.loads(content)
         else:
             return {}
+
+    def dump_obj(self, obj):
+        if self == TextFormat.YAML:
+            return yaml.dump(obj, default_flow_style=False, allow_unicode=True)
+        elif self == TextFormat.TOML:
+            return tomlkit.dumps(obj)
+        else:
+            return ''
 
 
 def read_file(file_path: str):
     text_format = TextFormat.decide_by_path(file_path)
     with open(file_path) as f:
         return text_format.load_str(f.read())
+
+
+def write_file(file_path: str, obj):
+    text_format = TextFormat.decide_by_path(file_path)
+    with open(file_path, 'w+') as f:
+        f.write(text_format.dump_obj(obj))
 
 
 def read_data_files(file_paths: List[str]) -> Dict:

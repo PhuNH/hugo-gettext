@@ -14,7 +14,7 @@ from mdit_py_hugo.shortcode import shortcode_plugin
 from mdit_py_plugins.deflist import deflist_plugin
 from mdit_py_plugins.front_matter import front_matter_plugin
 
-from .utils import read_file
+from . import utils
 
 
 def _read_domain_config(domain_config) -> List[str]:
@@ -110,11 +110,12 @@ def _get_rtl_langs() -> List[str]:
 
 
 class Config:
-    def __init__(self, hugo_config, customs_path: str = ''):
+    def __init__(self, hugo_config, config_path: str = '', customs_path: str = ''):
         if 'i18n' not in hugo_config:
             return
 
         i18n_config = hugo_config['i18n']
+        self.config_path = config_path
         # env. var. > config value
         self.package = os.environ.get('PACKAGE', '') or i18n_config.get('package', '')
         if not self.package:
@@ -181,8 +182,8 @@ class Config:
     def from_config_file(cls, config_path: str, customs_path: str = ''):
         if not config_path:
             config_path = 'hugo.toml'
-        hugo_config = read_file(config_path)
-        return cls(hugo_config, customs_path)
+        hugo_config = utils.read_file(config_path)
+        return cls(hugo_config, config_path, customs_path)
 
 
 def initialize(renderer_cls: Type[RendererProtocol],
