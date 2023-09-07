@@ -47,7 +47,10 @@ def generate(args):
     :return: None
     """
     hg_config, mdi = initialize(RendererHugoL10N, args.customs, args.config)
-    src_strings = utils.read_strings()
+    if hg_config.do_strings and hg_config.string_file_path:
+        src_strings = utils.read_file(hg_config.string_file_path)
+    else:
+        src_strings = {}
     original_hugo_config = copy.deepcopy(hg_config.hugo_config)
     src_data = utils.read_data_files(hg_config.data)
 

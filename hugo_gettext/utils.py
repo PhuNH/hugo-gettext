@@ -48,20 +48,20 @@ class HugoDomainGProtocol(DomainGenerationProtocol):
 
 
 class TextFormat(Enum):
-    ELSE = -1
-    YAML = 0
-    TOML = 1
+    ELSE = ''
+    YAML = '.yaml'
+    TOML = '.toml'
 
     @classmethod
     def decide_by_path(cls, path: str) -> 'TextFormat':
-        if (ext := os.path.splitext(path)[1]) in {'.yaml', '.yml'}:
+        if (ext := os.path.splitext(path)[1]) == cls.YAML.value or ext == '.yml':
             return cls.YAML
-        elif ext == '.toml':
+        elif ext == cls.TOML.value:
             return cls.TOML
         else:
             return cls.ELSE
 
-    def load_str(self, content: str):
+    def load_content(self, content: str):
         if self == TextFormat.YAML:
             return yaml.safe_load(content)
         elif self == TextFormat.TOML:
@@ -81,7 +81,7 @@ class TextFormat(Enum):
 def read_file(file_path: str):
     text_format = TextFormat.decide_by_path(file_path)
     with open(file_path) as f:
-        return text_format.load_str(f.read())
+        return text_format.load_content(f.read())
 
 
 def write_file(file_path: str, obj):
@@ -97,13 +97,3 @@ def read_data_files(file_paths: List[str]) -> Dict:
             continue
         src_data[path] = read_file(path)
     return src_data
-
-
-def read_strings() -> Dict:
-    try:
-        with open("i18n/en.yaml", 'r') as f_i18n:
-            src_strings = yaml.safe_load(f_i18n)
-    except FileNotFoundError:
-        src_strings = {}
-
-    return src_strings

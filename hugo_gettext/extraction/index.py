@@ -29,30 +29,33 @@ class Extraction:
     def i12ize_data_others(self):
         hg_config = self.hg_config
         # config fields
-        path = 'config.yaml'
-        default_language_config = hg_config.hugo_config.get('languages', {}).get('en', {})
+        default_language_config = hg_config.hugo_config.get('languages', {}).get(hg_config.default_lang, {})
         if hg_config.do_title:
             if 'title' not in default_language_config:
                 logging.warning(f"Default language config section doesn't have a `title` field.")
             else:
-                self.default_domain_e.add_entry(path, default_language_config['title'], 0)
+                self.default_domain_e.add_entry(hg_config.config_path, default_language_config['title'], 0)
         if hg_config.do_description:
             if 'params' not in default_language_config or 'description' not in default_language_config['params']:
                 logging.warning(f"Default language config section doesn't have a `params.description` field.")
             else:
-                self.default_domain_e.add_entry(path, default_language_config['params']['description'], 0)
+                self.default_domain_e.add_entry(hg_config.config_path,
+                                                default_language_config['params']['description'],
+                                                0)
         if hg_config.do_menu:
             for menu_entry in default_language_config['menu']['main']:
-                self.default_domain_e.add_entry(path, menu_entry['name'], 0)
+                self.default_domain_e.add_entry(hg_config.config_path, menu_entry['name'], 0)
         # data
         if hg_config.data:
             self.i12ize_data_files()
         # strings
-        if hg_config.do_strings:
-            path = 'i18n/en.yaml'
-            src_strings = utils.read_strings()
+        if hg_config.do_strings and hg_config.string_file_path:
+            src_strings = utils.read_file(hg_config.string_file_path)
             for _, string in src_strings.items():
-                self.default_domain_e.add_entry(path, string['other'], 0, string.get('comment', ''))
+                self.default_domain_e.add_entry(hg_config.string_file_path,
+                                                string['other'],
+                                                0,
+                                                string.get('comment', ''))
 
     def extract(self, target_dir: str):
         os.makedirs(target_dir, exist_ok=True)

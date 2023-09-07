@@ -7,13 +7,12 @@ import logging
 import os
 from typing import List, Dict
 
-import yaml
 from markdown_gettext.domain_generation import gettext_func
 from mdit_py_i18n.utils import L10NResult
 
 from .g_domain import HugoDomainG
 from .. import utils
-from ..utils import HugoGProtocol
+from ..utils import HugoGProtocol, TextFormat
 
 L10NResults = Dict[str, List[L10NResult]]
 
@@ -26,7 +25,7 @@ class HugoLangG:
         self.g = g
         self.lang_code = lang_code
         self.hugo_lang_code = self.g.hg_config.convert_lang_code(self.lang_code)
-        self.lang_prefix = '' if self.hugo_lang_code == 'en' else f'/{self.hugo_lang_code}'
+        self.lang_prefix = '' if self.hugo_lang_code == self.g.hg_config.default_lang else f'/{self.hugo_lang_code}'
         self.l10n_results: L10NResults = {}
         self.file_l10n_count = 0
         self.default_domain_g = None
@@ -50,10 +49,10 @@ class HugoLangG:
 
     def write_strings(self, target_strings):
         if len(target_strings) > 0:
-            i18n_path = f'i18n/{self.hugo_lang_code}.yaml'
-            with open(i18n_path, 'w+') as f_target_i18n:
-                logging.info(i18n_path)
-                f_target_i18n.write(yaml.dump(target_strings, default_flow_style=False, allow_unicode=True))
+            text_format = TextFormat.decide_by_path(self.g.hg_config.string_file_path)
+            file_path = f'i18n/{self.hugo_lang_code}{text_format.value}'
+            utils.write_file(file_path, target_strings)
+            logging.info(file_path)
 
     def localize_languages(self):
         hg_config = self.g.hg_config
@@ -76,7 +75,7 @@ class HugoLangG:
     def localize_menu(self):
         menu = {'main': []}
         hugo_config = self.g.hg_config.hugo_config
-        for menu_item in hugo_config['languages']['en']['menu']['main']:
+        for menu_item in hugo_config['languages'][self.g.hg_config.default_lang]['menu']['main']:
             target_menu_item = copy.deepcopy(menu_item)
             target_menu_item['name'] = self.default_domain_g.l10n_func(target_menu_item['name'])
             menu['main'].append(target_menu_item)
@@ -85,13 +84,14 @@ class HugoLangG:
     def localize_description(self):
         hugo_config = self.g.hg_config.hugo_config
         hugo_config['languages'][self.hugo_lang_code]['params'] = {
-            'description': self.default_domain_g.l10n_func(hugo_config['languages']['en']['params']['description'])
+            'description': self.default_domain_g.l10n_func(
+                hugo_config['languages'][self.g.hg_config.default_lang]['params']['description'])
         }
 
     def localize_title(self):
         hugo_config = self.g.hg_config.hugo_config
         hugo_config['languages'][self.hugo_lang_code]['title'] = (
-            self.default_domain_g.l10n_func(hugo_config['languages']['en']['title']))
+            self.default_domain_g.l10n_func(hugo_config['languages'][self.g.hg_config.default_lang]['title']))
 
     def generate_data_files(self):
         for path, data in self.g.src_data.items():
@@ -106,19 +106,18 @@ class HugoLangG:
                 utils.write_file(target_path, data)
 
     def generate_data_others(self):
-        """Generate strings file and data files, and localize config fields.
-        Strings file will be generated even if the language doesn't meet requirements.
+        """Generate string file and data files, and localize config fields.
+        String file will be generated even if the language doesn't meet requirements.
         Config fields and data files won't.
         """
         hg_config = self.g.hg_config
-        src_strings = self.g.src_strings
         file_total_count = self.g.file_total_count
         file_l10n_count = self.file_l10n_count
-        strings_ok = True
-        if hg_config.do_strings and src_strings is not None:
-            strings_result = self.localize_strings()
-            self.write_strings(strings_result.localized)
-            strings_ok = strings_result.l10n_count > 0
+        # src_strings is already checked outside, no check needed here anymore
+        strings_result = self.localize_strings()
+        self.write_strings(strings_result.localized)
+        # strings is considered ok when there's no source string or when some strings are translated
+        strings_ok = strings_result.rate == -1 or strings_result.l10n_count > 0
 
         # Only generate the config section and data files for the language if conditions are met
         # X = 'languages' in hugo_config and (

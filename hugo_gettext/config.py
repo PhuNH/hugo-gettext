@@ -4,6 +4,7 @@
 import glob
 import importlib.util
 import inspect
+import logging
 import os
 from typing import List, Dict, Callable, Set, Type, Tuple
 
@@ -61,6 +62,25 @@ def _read_content_config(i18n_config) -> Dict[str, List[str]]:
     for domain in content_config:
         content_files[domain] = _read_domain_config(content_config[domain])
     return content_files
+
+
+def _find_string_file(default_lang: str) -> str:
+    if not os.path.isdir('i18n'):
+        return ''
+    possible_paths = [f'i18n/{default_lang}.toml',
+                      f'i18n/{default_lang}.yaml']
+    for path in possible_paths:
+        if os.path.isfile(path):
+            return path
+    return ''
+
+
+def _find_config_file() -> str:
+    possible_paths = ['hugo.toml', 'hugo.yaml', 'config.toml', 'config.yaml']
+    for path in possible_paths:
+        if os.path.isfile(path):
+            return path
+    return ''
 
 
 excluded_keys = {'aliases', 'date',
@@ -168,6 +188,11 @@ class Config:
         self.excluded_keys = excluded_keys | custom_excluded_keys | set(i18n_config.get('excludedKeys', '').split())
         self.shortcodes = i18n_config.get('shortcodes', {})
 
+        self.default_lang = hugo_config.get('defaultContentLanguage', 'en')
+        self.string_file_path = _find_string_file(self.default_lang)
+        if self.do_strings and not self.string_file_path:
+            logging.warning('Strings specified as an i18n target, but no string file in the default language found')
+
         goldmark_config = hugo_config.get('markup', {}).get('goldmark', {})
         extensions_config = goldmark_config.get('extensions', {})
         self.parse_definition_list = extensions_config.get('definitionList', True)
@@ -181,7 +206,7 @@ class Config:
     @classmethod
     def from_config_file(cls, config_path: str, customs_path: str = ''):
         if not config_path:
-            config_path = 'hugo.toml'
+            config_path = _find_config_file()
         hugo_config = utils.read_file(config_path)
         return cls(hugo_config, config_path, customs_path)
 
