@@ -5,9 +5,16 @@ import glob
 import importlib.util
 import inspect
 import os
-from typing import List, Dict, Callable, Set
+from typing import List, Dict, Callable, Set, Type, Tuple
 
-import yaml
+from markdown_it import MarkdownIt
+from markdown_it.renderer import RendererProtocol
+from mdit_py_hugo.attribute import attribute_plugin
+from mdit_py_hugo.shortcode import shortcode_plugin
+from mdit_py_plugins.deflist import deflist_plugin
+from mdit_py_plugins.front_matter import front_matter_plugin
+
+from .utils import read_file
 
 
 def _read_domain_config(domain_config) -> List[str]:
@@ -103,11 +110,9 @@ def _get_rtl_langs() -> List[str]:
 
 
 class Config:
-    def __init__(self, customs_path):
-        with open('config.yaml') as f:
-            hugo_config = yaml.safe_load(f)
-            if 'i18n' not in hugo_config:
-                return
+    def __init__(self, hugo_config, customs_path: str = ''):
+        if 'i18n' not in hugo_config:
+            return
 
         i18n_config = hugo_config['i18n']
         # env. var. > config value
@@ -171,3 +176,24 @@ class Config:
         self.parse_attribute_title = attribute_config.get('title', True)
 
         self.hugo_config = hugo_config
+
+    @classmethod
+    def from_config_file(cls, config_path: str, customs_path: str = ''):
+        if not config_path:
+            config_path = 'hugo.toml'
+        hugo_config = read_file(config_path)
+        return cls(hugo_config, customs_path)
+
+
+def initialize(renderer_cls: Type[RendererProtocol],
+               customs_path: str = '',
+               config_path: str = '') -> Tuple[Config, MarkdownIt]:
+    hg_config = Config.from_config_file(config_path, customs_path)
+    mdi = MarkdownIt(renderer_cls=renderer_cls).use(front_matter_plugin).use(shortcode_plugin)
+    if hg_config.parse_table:
+        mdi = mdi.enable('table')
+    if hg_config.parse_definition_list:
+        mdi = mdi.use(deflist_plugin)
+    if hg_config.parse_attribute_title or hg_config.parse_attribute_block:
+        mdi = mdi.use(attribute_plugin, block=hg_config.parse_attribute_block, title=hg_config.parse_attribute_title)
+    return hg_config, mdi

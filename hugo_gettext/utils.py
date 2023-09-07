@@ -3,18 +3,13 @@
 
 import os
 import re
-from typing import Tuple, Dict, Type, Protocol, Any
+from enum import Enum
+from typing import Dict, Protocol, Any, List
 
+import pytomlpp
 import yaml
 from markdown_it import MarkdownIt
-from markdown_it.renderer import RendererProtocol
-from mdit_py_hugo.attribute import attribute_plugin
-from mdit_py_hugo.shortcode import shortcode_plugin
 from mdit_py_i18n.utils import DomainGenerationProtocol, DomainExtractionProtocol
-from mdit_py_plugins.deflist import deflist_plugin
-from mdit_py_plugins.front_matter import front_matter_plugin
-
-from .config import Config
 
 SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
 SHORTCODE_QUOTES = {'"', '`'}
@@ -52,26 +47,41 @@ class HugoDomainGProtocol(DomainGenerationProtocol):
     lang_g: HugoLangGProtocol
 
 
-def initialize(customs_path: str, renderer_cls: Type[RendererProtocol]) -> Tuple[Config, MarkdownIt]:
-    hg_config = Config(customs_path)
-    mdi = MarkdownIt(renderer_cls=renderer_cls).use(front_matter_plugin).use(shortcode_plugin)
-    if hg_config.parse_table:
-        mdi = mdi.enable('table')
-    if hg_config.parse_definition_list:
-        mdi = mdi.use(deflist_plugin)
-    if hg_config.parse_attribute_title or hg_config.parse_attribute_block:
-        mdi = mdi.use(attribute_plugin, block=hg_config.parse_attribute_block, title=hg_config.parse_attribute_title)
-    return hg_config, mdi
+class TextFormat(Enum):
+    ELSE = -1
+    YAML = 0
+    TOML = 1
+
+    @classmethod
+    def decide_by_path(cls, path: str) -> 'TextFormat':
+        if (ext := os.path.splitext(path)[1]) in {'.yaml', '.yml'}:
+            return cls.YAML
+        elif ext == '.toml':
+            return cls.TOML
+        else:
+            return cls.ELSE
+
+    def load_str(self, content: str):
+        if self == TextFormat.YAML:
+            return yaml.safe_load(content)
+        elif self == TextFormat.TOML:
+            return pytomlpp.loads(content)
+        else:
+            return {}
 
 
-def read_data_files(hg_config: Config) -> Dict:
+def read_file(file_path: str):
+    text_format = TextFormat.decide_by_path(file_path)
+    with open(file_path) as f:
+        return text_format.load_str(f.read())
+
+
+def read_data_files(file_paths: List[str]) -> Dict:
     src_data = {}
-    for path in hg_config.data:
+    for path in file_paths:
         if not os.path.isfile(path):
             continue
-        with open(path, 'r') as f_data:
-            data = yaml.safe_load(f_data)
-        src_data[path] = data
+        src_data[path] = read_file(path)
     return src_data
 
 

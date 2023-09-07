@@ -12,7 +12,7 @@ from markdown_it import MarkdownIt
 from .g_lang import HugoLangG
 from .renderer_hugo_l10n import RendererHugoL10N
 from .. import utils
-from ..config import Config
+from ..config import Config, initialize
 
 
 class Generation:
@@ -42,14 +42,15 @@ class Generation:
 def generate(args):
     """Generate target messages and files
     :param args: arguments passed in command line, containing
-        - customs (optional): path to Python file containing custom functions, default ''
+        - customs (optional): path to Python file containing custom functions
+        - config (optional): path to config file
         - keep_locale (optional): do not delete locale folder, default False
     :return: None
     """
-    hg_config, mdi = utils.initialize(args.customs, RendererHugoL10N)
+    hg_config, mdi = initialize(RendererHugoL10N, args.customs, args.config)
     src_strings = utils.read_strings()
     original_hugo_config = copy.deepcopy(hg_config.hugo_config)
-    src_data = utils.read_data_files(hg_config)
+    src_data = utils.read_data_files(hg_config.data)
 
     Generation(src_strings, src_data, hg_config, mdi).generate(args.keep_locale)
 

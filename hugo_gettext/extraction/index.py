@@ -9,7 +9,7 @@ from markdown_it import MarkdownIt
 from .e_domain import HugoDomainE
 from .renderer_hugo_i18n import RendererHugoI18N
 from .. import utils
-from ..config import Config
+from ..config import Config, initialize
 
 
 class Extraction:
@@ -22,7 +22,7 @@ class Extraction:
         self.default_domain_e = HugoDomainE(self)
 
     def i12ize_data_files(self):
-        for path, data in utils.read_data_files(self.hg_config).items():
+        for path, data in utils.read_data_files(self.hg_config.data).items():
             self.default_domain_e.i12ize_object(data, self.hg_config.excluded_data_keys, path, self.mdi)
             logging.info(path)
 
@@ -72,8 +72,9 @@ def extract(args):
     :param args: arguments passed in command line, containing
         - pot: path of the directory containing the target pot file(s)
         - customs (optional): path to Python file containing custom functions
+        - config (optional): path to config file
     :return: None. Data, config fields, and strings are extracted to the default domain,
     while content files are extracted to configured domains.
     """
-    hg_config, mdi = utils.initialize(args.customs, RendererHugoI18N)
+    hg_config, mdi = initialize(RendererHugoI18N, args.customs, args.config)
     Extraction(hg_config, mdi).extract(args.pot)

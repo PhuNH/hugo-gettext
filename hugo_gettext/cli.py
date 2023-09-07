@@ -19,11 +19,13 @@ def main():
                                         formatter_class=RawTextHelpFormatter)
     extract_cmd.add_argument('pot', help='path of the directory containing the target pot file(s)')
     extract_cmd.add_argument('-c', '--customs', help='path to Python file containing custom functions')
+    extract_cmd.add_argument('-f', '--config', help='path to config file')
     extract_cmd.set_defaults(func=extract)
 
     generate_cmd = subparsers.add_parser('generate', help='generate target messages and files',
                                          formatter_class=RawTextHelpFormatter)
     generate_cmd.add_argument('-c', '--customs', help='path to Python file containing custom functions')
+    generate_cmd.add_argument('-f', '--config', help='path to config file')
     generate_cmd.add_argument('-k', '--keep-locale', action='store_true', help='do not delete locale folder')
     generate_cmd.set_defaults(func=generate)
 
