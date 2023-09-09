@@ -68,7 +68,8 @@ def _find_string_file(default_lang: str) -> str:
     if not os.path.isdir('i18n'):
         return ''
     possible_paths = [f'i18n/{default_lang}.toml',
-                      f'i18n/{default_lang}.yaml']
+                      f'i18n/{default_lang}.yaml',
+                      f'i18n/{default_lang}.json']
     for path in possible_paths:
         if os.path.isfile(path):
             return path
@@ -76,7 +77,8 @@ def _find_string_file(default_lang: str) -> str:
 
 
 def _find_config_file() -> str:
-    possible_paths = ['hugo.toml', 'hugo.yaml', 'config.toml', 'config.yaml']
+    possible_paths = ['hugo.toml', 'hugo.yaml', 'hugo.json',
+                      'config.toml', 'config.yaml', 'config.json']
     for path in possible_paths:
         if os.path.isfile(path):
             return path

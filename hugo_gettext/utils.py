@@ -1,6 +1,7 @@
 # SPDX-FileCopyrightText: 2023 Phu Hung Nguyen <phuhnguyen@outlook.com>
 # SPDX-License-Identifier: LGPL-2.1-or-later
 
+import json
 import os
 import re
 from enum import Enum
@@ -51,6 +52,7 @@ class TextFormat(Enum):
     ELSE = ''
     YAML = '.yaml'
     TOML = '.toml'
+    JSON = '.json'
 
     @classmethod
     def decide_by_path(cls, path: str) -> 'TextFormat':
@@ -58,6 +60,8 @@ class TextFormat(Enum):
             return cls.YAML
         elif ext == cls.TOML.value:
             return cls.TOML
+        elif ext == cls.JSON.value:
+            return cls.JSON
         else:
             return cls.ELSE
 
@@ -66,6 +70,8 @@ class TextFormat(Enum):
             return yaml.safe_load(content)
         elif self == TextFormat.TOML:
             return tomlkit.loads(content)
+        elif self == TextFormat.JSON:
+            return json.loads(content)
         else:
             return {}
 
@@ -74,6 +80,8 @@ class TextFormat(Enum):
             return yaml.dump(obj, default_flow_style=False, allow_unicode=True)
         elif self == TextFormat.TOML:
             return tomlkit.dumps(obj)
+        elif self == TextFormat.JSON:
+            return json.dumps(obj, ensure_ascii=False, indent=4)
         else:
             return ''
 
