@@ -25,7 +25,6 @@ class HugoLangG:
         self.g = g
         self.lang_code = lang_code
         self.hugo_lang_code = self.g.hg_config.convert_lang_code(self.lang_code)
-        self.lang_prefix = '' if self.hugo_lang_code == self.g.hg_config.default_lang else f'/{self.hugo_lang_code}'
         self.l10n_results: L10NResults = {}
         self.file_l10n_count = 0
         self.default_domain_g = None
@@ -98,7 +97,7 @@ class HugoLangG:
             # make a copy because other languages need to use this too
             data = copy.deepcopy(data)
             src_sub_path = path.split('/', 1)[1]
-            target_path = f'data{self.lang_prefix}/{src_sub_path}'
+            target_path = f'data/{self.hugo_lang_code}/{src_sub_path}'
             os.makedirs(os.path.dirname(target_path), exist_ok=True)
 
             o_result = self.default_domain_g.localize_object(data, self.g.hg_config.excluded_data_keys, self.g.mdi)

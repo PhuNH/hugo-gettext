@@ -14,7 +14,7 @@ from mdit_py_i18n.utils import DomainGenerationProtocol, DomainExtractionProtoco
 
 SINGLE_COMMENT_PATTERN = re.compile('(// *)(.*)')
 SHORTCODE_QUOTES = {'"', '`'}
-HG_STOP = 'hg-stop'
+HG_STOP = 'hg_stop'
 
 
 class HugoEProtocol(Protocol):

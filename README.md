@@ -7,6 +7,8 @@ SPDX-License-Identifier: CC-BY-SA-4.0
 
 I18n with gettext for Hugo.
 
+Currently compliant with Hugo 0.110.0.
+
 ## Install
 
 ```bash
@@ -77,7 +79,7 @@ Some notes about how different elements are handled:
 #### Shortcodes
 - If the string contains only one shortcode
 - Newlines are kept for arguments quoted with backticks
-- hg-stop shortcode to stop processing a content file
+- hg_stop shortcode to stop processing a content file
 
 #### Attributes
 
