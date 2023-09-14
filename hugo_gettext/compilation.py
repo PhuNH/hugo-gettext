@@ -22,5 +22,12 @@ def compile_po(args):
             po_path = f'{src_path}/{po}'
             mo_path = f'{target_path}/{po[:-2]}mo'
             command = f'msgfmt {po_path} -o {mo_path}'
+            try:
+                os.remove(mo_path)
+                logging.info(f'Removed {mo_path}')
+            except OSError:
+                logging.info(f"{mo_path} doesn't exist or can't be removed")
+                pass
             subprocess.run(command, shell=True, check=True)
+            logging.info(f'Created {mo_path}')
         logging.info(f'Compiled {lang}')
