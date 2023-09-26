@@ -3,7 +3,7 @@
 
 [tool.poetry]
 name = "hugo-gettext"
-version = "0.5.2"
+version = "0.5.3"
 description = "I18n with gettext for Hugo"
 authors = ["Phu Hung Nguyen <phuhnguyen@outlook.com>"]
 license = "LGPL-2.1-or-later"

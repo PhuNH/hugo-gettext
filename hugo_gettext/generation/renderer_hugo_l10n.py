@@ -158,10 +158,10 @@ class RendererHugoL10N(RendererMarkdownL10N):
         cls._attributes(token, md_ctx, content_result)
         if idx < len(tokens) - 1:
             next_token = tokens[idx + 1]
-            # add a blank line when next token is a setext heading_open, an indented code block, a paragraph open,
-            # or a definition list open
+            # add a blank line when next token is a setext heading_open, an HTML block, an indented code block,
+            # a paragraph open, or a definition list open
             if (next_token.type == 'heading_open' and next_token.markup in SETEXT_HEADING_MARKUPS) \
-                    or next_token.type in {'code_block', 'paragraph_open', 'dl_open'}:
+                    or next_token.type in {'code_block', 'html_block', 'paragraph_open', 'dl_open'}:
                 content_result.localized += f'{md_ctx.line_indent}\n'
 
     @classmethod
