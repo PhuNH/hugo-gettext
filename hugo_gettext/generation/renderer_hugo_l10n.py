@@ -68,6 +68,8 @@ class RendererHugoL10N(RendererMarkdownL10N):
                 if localized_content is not content:
                     content_result.l10n_count += 1
                 content_result.total_count += 1
+                if quote:
+                    localized_content = localized_content.replace(quote, f'\\{quote}')
             else:
                 localized_content = content
             param_name_part = '' if token.meta['is_positional'] else f'{param}='
