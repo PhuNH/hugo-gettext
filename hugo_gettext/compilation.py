@@ -5,6 +5,8 @@ import logging
 import os
 import subprocess
 
+import polib
+
 
 def compile_po(args):
     """Compile translated messages to binary format stored in 'locale/{lang}/LC_MESSAGES' directory
@@ -13,6 +15,15 @@ def compile_po(args):
     :return: None
     """
     po_dir = args.dir
+
+    with_gettext = True
+    test_gettext_cmd = 'msgfmt -V'
+    try:
+        # do not show the output of running test_gettext_cmd
+        subprocess.run(test_gettext_cmd, shell=True, check=True, capture_output=True)
+    except subprocess.CalledProcessError:
+        with_gettext = False
+
     for lang in os.listdir(po_dir):
         target_path = f'locale/{lang}/LC_MESSAGES'
         os.makedirs(target_path, exist_ok=True)
@@ -21,6 +32,10 @@ def compile_po(args):
         for po in os.listdir(src_path):
             po_path = f'{src_path}/{po}'
             mo_path = f'{target_path}/{po[:-2]}mo'
+            if not with_gettext:
+                polib.pofile(po_path).save_as_mofile(mo_path)
+                continue
+
             command = f'msgfmt {po_path} -o {mo_path}'
             try:
                 os.remove(mo_path)
