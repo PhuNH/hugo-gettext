@@ -33,6 +33,7 @@ class HugoDomainE(DomainExtraction):
             if mdi:
                 env = {
                     'path': path,
+                    'parse_fence': self.e.hg_config.parse_fence,
                     'domain_extraction': self,
                     'with_line': False
                 }
@@ -52,6 +53,7 @@ class HugoDomainE(DomainExtraction):
         with open(path) as f_content:
             env = {
                 'path': path,
+                'parse_fence': self.e.hg_config.parse_fence,
                 'domain_extraction': self,
                 'with_line': True
             }

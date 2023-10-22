@@ -131,6 +131,10 @@ def _get_rtl_langs() -> List[str]:
     return []
 
 
+def _get_parse_fence() -> bool:
+    return False
+
+
 class Config:
     def __init__(self, hugo_config, config_path: str = '', customs_path: str = ''):
         if 'i18n' not in hugo_config:
@@ -170,6 +174,12 @@ class Config:
             self.rtl_langs = rtl_langs
         else:
             self.rtl_langs = get_rtl_langs()
+        #   parse_fence
+        get_parse_fence = customs_functions.get('get_parse_fence', _get_parse_fence)
+        if parse_fence := i18n_config.get('parse_fence', False):
+            self.parse_fence = parse_fence
+        else:
+            self.parse_fence = get_parse_fence()
 
         # custom functions with no corresponding config fields
         get_custom_excluded_keys = customs_functions.get('get_custom_excluded_keys', _get_custom_excluded_keys)

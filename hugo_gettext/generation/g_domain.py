@@ -31,6 +31,7 @@ class HugoDomainG:
         """
         if mdi:
             env = {
+                'parse_fence': self.lang_g.g.hg_config.parse_fence,
                 'domain_generation': self
             }
             _, content_result = mdi.render(s, env)
@@ -137,6 +138,7 @@ class HugoDomainG:
             return results[0], results[1]
         with open(path) as f_content:
             env = {
+                'parse_fence': self.lang_g.g.hg_config.parse_fence,
                 'domain_generation': self
             }
             fm_result, content_result = self.lang_g.g.mdi.render(f_content.read(), env)
