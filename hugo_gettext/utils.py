@@ -48,6 +48,27 @@ class HugoDomainGProtocol(DomainGenerationProtocol):
     lang_g: HugoLangGProtocol
 
 
+class StrWithLineInfo(str):
+    def __new__(cls, value: str, line = 0):
+        instance = super().__new__(cls, value)
+        return instance
+    def __init__(self, value: str, line = 0):
+        self.line = line
+
+
+class YamlSafeLineLoader(yaml.loader.SafeLoader):
+    """Like SafeLoader except line information is attached to strings."""
+    def construct_scalar(self, node):
+        value = super().construct_scalar(node)
+        if isinstance(value, str):
+            # Line numbers from PyYAML count from 0 but displayed line numbers
+            # usually count from 1. Correct for that.
+            line = node.start_mark.line + 1
+            return StrWithLineInfo(value, line)
+        else:
+            return value
+
+
 class TextFormat(Enum):
     ELSE = ''
     YAML = '.yaml'
@@ -67,7 +88,7 @@ class TextFormat(Enum):
 
     def load_content(self, content: str):
         if self == TextFormat.YAML:
-            return yaml.safe_load(content)
+            return yaml.load(content, Loader=YamlSafeLineLoader)
         elif self == TextFormat.TOML:
             return tomlkit.loads(content)
         elif self == TextFormat.JSON:
@@ -99,6 +120,10 @@ def write_file(file_path: str, obj):
 
 
 def read_data_files(file_paths: List[str]) -> Dict:
+    """Read data files content into dict values.
+    :param file_paths: a list of paths to data files
+    :return: Dict mapping paths to file content values
+    """
     src_data = {}
     for path in file_paths:
         if not os.path.isfile(path):
