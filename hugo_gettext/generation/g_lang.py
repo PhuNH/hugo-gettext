@@ -16,6 +16,8 @@ from ..utils import HugoGProtocol, TextFormat
 
 L10NResults = Dict[str, List[L10NResult]]
 
+_trans_table = str.maketrans('@_', '--')
+
 
 class HugoLangG:
     """
@@ -59,7 +61,7 @@ class HugoLangG:
         hugo_lang_code = self.hugo_lang_code
         if hugo_lang_code not in hugo_config['languages']:
             hugo_config['languages'][hugo_lang_code] = {}
-        hugo_config['languages'][hugo_lang_code]['languageCode'] = self.lang_code
+        hugo_config['languages'][hugo_lang_code]['languageCode'] = self.lang_code.translate(_trans_table)
         hugo_config['languages'][hugo_lang_code]['weight'] = 2
 
         if hugo_lang_code in self.g.lang_names:
