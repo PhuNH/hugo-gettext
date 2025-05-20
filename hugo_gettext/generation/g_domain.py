@@ -165,7 +165,7 @@ class HugoDomainG:
         for src_path in domain_paths:
             if os.path.isfile(src_path):
                 fm_result, content_result = self.render_content_file(src_path)
-                if fm_result.l10n_count > 0 or content_result.rate == -1 or content_result.rate > 0.5:
+                if fm_result.l10n_count > 0 or content_result.rate == -1 or content_result.rate > 0.5 or src_path.endswith('_index.md'):
                     # print(f'{src_path}: {fm_result}; {content_result}')
                     self.write_content_file(fm_result.localized, content_result.localized, src_path)
                     file_l10n_count += 1
