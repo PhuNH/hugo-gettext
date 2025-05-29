@@ -43,8 +43,9 @@ class Extraction:
                                                 default_language_config['params']['description'],
                                                 0)
         if hg_config.do_menu:
-            for menu_entry in default_language_config['menu']['main']:
-                self.default_domain_e.add_entry(hg_config.config_path, menu_entry['name'], 0)
+            for menu_name, menu_entries in default_language_config['menu'].items():
+                for menu_entry in menu_entries:
+                    self.default_domain_e.add_entry(hg_config.config_path, menu_entry['name'], 0)
         # data
         if hg_config.data:
             self.i12ize_data_files()

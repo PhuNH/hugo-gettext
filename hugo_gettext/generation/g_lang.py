@@ -72,12 +72,14 @@ class HugoLangG:
             hugo_config['languages'][hugo_lang_code]['contentDir'] = f'{hg_config.gen_dir}/{hugo_lang_code}'
 
     def localize_menu(self):
-        menu = {'main': []}
+        menu = {}
         hugo_config = self.g.hg_config.hugo_config
-        for menu_item in hugo_config['languages'][self.g.hg_config.default_lang]['menu']['main']:
-            target_menu_item = copy.deepcopy(menu_item)
-            target_menu_item['name'] = self.default_domain_g.l10n_func(target_menu_item['name'])
-            menu['main'].append(target_menu_item)
+        for menu_name, menu_items in hugo_config['languages'][self.g.hg_config.default_lang]['menu'].items():
+            menu[menu_name] = []
+            for menu_item in menu_items:
+                target_menu_item = copy.deepcopy(menu_item)
+                target_menu_item['name'] = self.default_domain_g.l10n_func(target_menu_item['name'])
+                menu[menu_name].append(target_menu_item)
         hugo_config['languages'][self.hugo_lang_code]['menu'] = menu
 
     def localize_description(self):
