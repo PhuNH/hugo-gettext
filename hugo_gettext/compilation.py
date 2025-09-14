@@ -41,7 +41,8 @@ def compile_po(args):
                 os.remove(mo_path)
                 logging.info(f'Removed {mo_path}')
             except OSError:
-                logging.info(f"{mo_path} doesn't exist or can't be removed")
+                if os.path.exists(mo_path):
+                    logging.info(f"{mo_path} could not be removed")
                 pass
             subprocess.run(command, shell=True, check=True)
             logging.info(f'Created {mo_path}')
