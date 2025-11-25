@@ -48,14 +48,17 @@ class Extraction:
         # data
         if hg_config.data:
             self.i12ize_data_files()
-        # strings
+        # strings (like i18n/en.yaml)
         if hg_config.do_strings and hg_config.string_file_path:
             src_strings = utils.read_file(hg_config.string_file_path)
-            for _, string in src_strings.items():
+            for key, string in src_strings.items():
+                msgid = string['other']
+                line = msgid.line if isinstance(msgid, utils.StrWithLineInfo) else 0
                 self.default_domain_e.add_entry(hg_config.string_file_path,
-                                                string['other'],
-                                                0,
-                                                string.get('comment', ''))
+                                                msgid,
+                                                line,
+                                                string.get('comment', ''),
+                                                msgctxt=key)
 
     def extract(self, target_dir: str):
         os.makedirs(target_dir, exist_ok=True)
